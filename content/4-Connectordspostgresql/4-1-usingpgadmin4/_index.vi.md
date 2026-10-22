@@ -1,6 +1,5 @@
 ---
 title : "Sử dụng pgAdmin4 để kết nối đến RDS PostgreSQL"
-date :  "`r Sys.Date()`" 
 weight : 1 
 chapter : false
 pre : " <b> 4.1. </b> "

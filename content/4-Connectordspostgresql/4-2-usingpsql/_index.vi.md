@@ -1,6 +1,5 @@
 ---
 title : "Sử dụng EC2 instance để kết nối với RDS PostgreSQL"
-date :  "`r Sys.Date()`" 
 weight : 2 
 chapter : false
 pre : " <b> 4.2 </b> "

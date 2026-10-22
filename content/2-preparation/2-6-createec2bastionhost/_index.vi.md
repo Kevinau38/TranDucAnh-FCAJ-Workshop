@@ -1,6 +1,5 @@
 ---
 title : "Tạo EC2 instance bastion h "
-date :  "`r Sys.Date()`" 
 weight : 6
 chapter : false
 pre : " <b> 2.6. </b> "
