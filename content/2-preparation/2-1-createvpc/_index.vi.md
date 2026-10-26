@@ -21,36 +21,42 @@ Workshop này **không** dùng NAT gateway vì NAT gateway tính phí theo giờ
 
 #### Tạo VPC
 
-1. Mở [Amazon VPC console](https://console.aws.amazon.com/vpc/), chọn **Your VPCs**, sau đó chọn **Create VPC**.
+1. Mở [Amazon VPC console](https://console.aws.amazon.com/vpc/):
+    - (1) Chọn **Your VPCs**.
+    - (2) Chọn **Create VPC**.
 
     ![Create VPC](/images/2-preparation/2.1/1.png)
 
 2. Trong **VPC settings**:
     - (1) Tại **Resources to create**, chọn **VPC and more**.
     - (2) Tại **Name tag auto-generation**, giữ **Auto-generate** và nhập `rdspg-lab`.
-    - (3) Tại **IPv4 CIDR block**, nhập `10.0.0.0/16`. Tại **IPv6 CIDR block**, chọn **No IPv6 CIDR block**.
-    - Giữ **Tenancy** là **Default** và không thay đổi **Encryption settings**.
+    - (3) Tại **IPv4 CIDR block**, nhập `10.0.0.0/16`.
+    - (4) Tại **IPv6 CIDR block**, chọn **No IPv6 CIDR block**.
+    - (5) Giữ **Tenancy** là **Default**. Không thay đổi **Encryption settings**.
 
     ![VPC settings](/images/2-preparation/2.1/2.png)
 
-3. Cấu hình subnet và kết nối:
+3. Cấu hình subnet và NAT gateway:
     - (1) **Number of Availability Zones (AZs)**: `2`
     - (2) **Number of public subnets**: `2`
     - (3) **Number of private subnets**: `2`
     - (4) **NAT gateways**: **None**
-    - (5) **VPC endpoints**: **S3 Gateway**
 
-    ![Subnets and connections](/images/2-preparation/2.1/3.png)
+    ![Subnets and NAT gateways](/images/2-preparation/2.1/3.png)
 
-4. (1) Tại **DNS options**, giữ chọn cả **Enable DNS hostnames** và **Enable DNS resolution**. (2) Chọn **Create VPC**.
+4. Hoàn tất cấu hình:
+    - (1) **VPC endpoints**: **S3 Gateway**
+    - (2) **DNS options**: giữ chọn cả **Enable DNS hostnames** và **Enable DNS resolution**.
+    - (3) Chọn **Create VPC**.
 
-    ![DNS options](/images/2-preparation/2.1/4.png)
+    ![VPC endpoints and DNS options](/images/2-preparation/2.1/4.png)
 
 {{% notice note %}}
 Cả hai tùy chọn DNS đều bắt buộc. Bạn kết nối tới Amazon RDS qua **endpoint**, là một tên miền dạng `xxx.rds.amazonaws.com`, không phải địa chỉ IP.
 {{% /notice %}}
 
-5. Đợi đến khi tất cả các bước hiển thị **Success**, sau đó chọn **View VPC**.
+5. Đợi đến khi tất cả các bước hiển thị **Success**:
+    - (1) Chọn **View VPC**.
 
     ![Create VPC workflow](/images/2-preparation/2.1/5.png)
 

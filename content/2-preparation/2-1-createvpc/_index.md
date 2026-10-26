@@ -21,36 +21,42 @@ This workshop does **not** use a NAT gateway, because a NAT gateway is charged p
 
 #### Create the VPC
 
-1. Open the [Amazon VPC console](https://console.aws.amazon.com/vpc/), choose **Your VPCs**, then choose **Create VPC**.
+1. Open the [Amazon VPC console](https://console.aws.amazon.com/vpc/):
+    - (1) Choose **Your VPCs**.
+    - (2) Choose **Create VPC**.
 
     ![Create VPC](/images/2-preparation/2.1/1.png)
 
 2. In **VPC settings**:
     - (1) For **Resources to create**, choose **VPC and more**.
     - (2) For **Name tag auto-generation**, keep **Auto-generate** selected and enter `rdspg-lab`.
-    - (3) For **IPv4 CIDR block**, enter `10.0.0.0/16`. For **IPv6 CIDR block**, choose **No IPv6 CIDR block**.
-    - Keep **Tenancy** as **Default** and leave **Encryption settings** unchanged.
+    - (3) For **IPv4 CIDR block**, enter `10.0.0.0/16`.
+    - (4) For **IPv6 CIDR block**, choose **No IPv6 CIDR block**.
+    - (5) Keep **Tenancy** as **Default**. Leave **Encryption settings** unchanged.
 
     ![VPC settings](/images/2-preparation/2.1/2.png)
 
-3. Configure the subnets and connections:
+3. Configure the subnets and NAT gateways:
     - (1) **Number of Availability Zones (AZs)**: `2`
     - (2) **Number of public subnets**: `2`
     - (3) **Number of private subnets**: `2`
     - (4) **NAT gateways**: **None**
-    - (5) **VPC endpoints**: **S3 Gateway**
 
-    ![Subnets and connections](/images/2-preparation/2.1/3.png)
+    ![Subnets and NAT gateways](/images/2-preparation/2.1/3.png)
 
-4. (1) In **DNS options**, keep both **Enable DNS hostnames** and **Enable DNS resolution** selected. (2) Choose **Create VPC**.
+4. Finish the configuration:
+    - (1) **VPC endpoints**: **S3 Gateway**
+    - (2) **DNS options**: keep both **Enable DNS hostnames** and **Enable DNS resolution** selected.
+    - (3) Choose **Create VPC**.
 
-    ![DNS options](/images/2-preparation/2.1/4.png)
+    ![VPC endpoints and DNS options](/images/2-preparation/2.1/4.png)
 
 {{% notice note %}}
 Both DNS options are required. You connect to Amazon RDS through its **endpoint**, which is a DNS name such as `xxx.rds.amazonaws.com`, not an IP address.
 {{% /notice %}}
 
-5. Wait until every step shows **Success**, then choose **View VPC**.
+5. Wait until every step shows **Success**:
+    - (1) Choose **View VPC**.
 
     ![Create VPC workflow](/images/2-preparation/2.1/5.png)
 

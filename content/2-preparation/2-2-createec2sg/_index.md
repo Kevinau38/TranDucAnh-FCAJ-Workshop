@@ -1,36 +1,71 @@
 ---
-title : "Create EC2 Security Group"
+title : "Create EC2 Security Groups"
 weight : 2
 chapter : false
 pre : " <b> 2.2. </b> "
 ---
 
+#### Overview
 
+In this step, you create two security groups for the EC2 instances:
 
-#### To create an EC2 security group in the AWS console:
+| Security group | Attached to | Inbound rule |
+|---|---|---|
+| `bastion-sg` | Bastion host | SSH (22) from **My IP** |
+| `app-sg` | App server | SSH (22) from **bastion-sg** |
 
-1. Go to the [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Home:).
-2. In the navigation pane, choose **Security Groups**.
-3. Choose Create Security Group.
+Only your computer can reach the bastion host, and only the bastion host can reach the App server.
 
-    ![Create EC2 SG](/images/preparation/2/1.png)
+{{% notice info %}}
+`app-sg` uses another **security group as the source** instead of an IP address. Any instance that has `bastion-sg` attached is allowed, even if its IP address changes.
+{{% /notice %}}
 
-4. For **VPC**, choose the VPC where you want to create the security group.
-5. For **Security group name**, enter a descriptive name for the security group.
-6. For **Description**, enter a description for the security group.
+#### Create bastion-sg
 
-    ![Create EC2 SG](/images/preparation/2/2.png)
+1. Open the [Amazon EC2 console](https://console.aws.amazon.com/ec2/), choose **Security Groups** under **Network & Security**, then choose **Create security group**.
 
-7. Modify Inbound Rule
+    ![Create security group](/images/2-preparation/2.2/1.png)
 
-    ![Create EC2 SG](/images/preparation/2/3.png)
+2. In **Basic details**:
+    - (1) **Security group name**: `bastion-sg`
+    - (2) **Description**: `Allow SSH from my IP to bastion host`
+    - (3) **VPC**: `rdspg-lab-vpc`
 
-8. Modify Outbound Rule
+    ![bastion-sg basic details](/images/2-preparation/2.2/2.png)
 
-    ![Create EC2 SG](/images/preparation/2/4.png)
+{{% notice warning %}}
+The **VPC** field defaults to your default VPC. Make sure you choose `rdspg-lab-vpc`. The security group name and description cannot be changed after creation.
+{{% /notice %}}
 
-9. Click **Create**.
+3. In **Inbound rules**, choose **Add rule**: (1) **Type**: `SSH`, (2) **Source type**: `My IP`.
 
-    ![Create EC2 SG](/images/preparation/2/5.png)
+    ![bastion-sg inbound rule](/images/2-preparation/2.2/3.png)
 
-Once you have created the security group for EC2 instances
+4. (1) Keep the default **Outbound rules**. (2) Choose **Create security group**.
+
+    ![bastion-sg outbound rule](/images/2-preparation/2.2/4.png)
+
+5. `bastion-sg` is created.
+
+    ![bastion-sg created](/images/2-preparation/2.2/5.png)
+
+{{% notice tip %}}
+Your public IP address may change. If you later cannot connect to the bastion host over SSH, edit this inbound rule and choose **My IP** again.
+{{% /notice %}}
+
+#### Create app-sg
+
+6. Choose **Create security group** again. In **Basic details**:
+    - (1) **Security group name**: `app-sg`
+    - (2) **Description**: `Allow SSH from bastion host to app server`
+    - (3) **VPC**: `rdspg-lab-vpc`
+
+    ![app-sg basic details](/images/2-preparation/2.2/6.png)
+
+7. In **Inbound rules**, choose **Add rule**: (1) **Type**: `SSH`, (2) **Source type**: `Custom`, (3) **Source**: choose `bastion-sg`.
+
+    ![app-sg inbound rule](/images/2-preparation/2.2/7.png)
+
+8. Keep the default outbound rules and choose **Create security group**. The inbound rule of `app-sg` allows SSH only from `bastion-sg`.
+
+    ![app-sg created](/images/2-preparation/2.2/8.png)

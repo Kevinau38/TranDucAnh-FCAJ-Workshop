@@ -1,33 +1,42 @@
 ---
-title : "Tạo RDS Security Group"
+title : "Tạo Security Group cho RDS"
 weight : 3
 chapter : false
 pre : " <b> 2.3. </b> "
 ---
 
+#### Tổng quan
 
-#### Tạo EC2 security group bằng giao diện AWS console:
+Ở bước này, bạn tạo `rds-sg` cho Amazon RDS for PostgreSQL. Security group này chỉ cho phép kết nối PostgreSQL (cổng **5432**) từ hai nguồn:
 
-1. Truy cập giao diện [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Home:).
-2. Tại bảng điều hướng, chọn **Security Groups**.
-3. Chọn **Create Security Group**.
+| Nguồn | Lý do |
+|---|---|
+| `app-sg` | App server kết nối tới database bằng `psql` |
+| `bastion-sg` | pgAdmin trên máy bạn kết nối qua SSH tunnel, nên kết nối tới RDS xuất phát từ bastion host |
 
-    ![Create EC2 SG](/images/preparation/2/1.png)
+{{% notice info %}}
+`rds-sg` không cho phép bất kỳ địa chỉ IP nào, kể cả IP của bạn. Máy tính của bạn chỉ tới được database thông qua bastion host.
+{{% /notice %}}
 
-4. Tại mục **VPC**, chọn VPC bạn muốn tạo security group.
-5. Tại mục **Security group name**, nhập tên cho security group.
-6. Tại mục **Description**, nhập mô tả cho security group.
+#### Tạo rds-sg
 
-    ![Create EC2 SG](/images/preparation/3/1.png)
+1. Trong [Amazon EC2 console](https://console.aws.amazon.com/ec2/), chọn **Security Groups**, sau đó chọn **Create security group**. Trong **Basic details**:
+    - (1) **Security group name**: `rds-sg`
+    - (2) **Description**: `Allow PostgreSQL from app server and bastion host`
+    - (3) **VPC**: `rdspg-lab-vpc`
 
-7. Cấu hình Inbound Rule
+    ![rds-sg basic details](/images/2-preparation/2.3/1.png)
 
-8. Cấu hình Outbound Rule
+2. Trong **Inbound rules**, thêm hai rule:
+    - (1) **Type**: `PostgreSQL`, **Source type**: `Custom`, **Source**: `app-sg`
+    - (2) **Type**: `PostgreSQL`, **Source type**: `Custom`, **Source**: `bastion-sg`
 
-    ![Create EC2 SG](/images/preparation/3/3.png)
+    ![rds-sg inbound rules](/images/2-preparation/2.3/2.png)
 
-9. Click **Create**.
+{{% notice note %}}
+Khi chọn type **PostgreSQL**, protocol tự động là TCP và cổng là 5432.
+{{% /notice %}}
 
-    ![Create EC2 SG](/images/preparation/3/4.png)
+3. Giữ mặc định outbound rules và chọn **Create security group**. `rds-sg` có hai inbound rule trên cổng 5432.
 
-***Bạn đã tạo thành công security group cho EC2 instance.***
+    ![rds-sg created](/images/2-preparation/2.3/3.png)

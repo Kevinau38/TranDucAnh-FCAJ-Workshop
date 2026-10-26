@@ -5,31 +5,38 @@ chapter : false
 pre : " <b> 2.3. </b> "
 ---
 
+#### Overview
 
-#### To create an EC2 security group in the AWS console:
+In this step, you create `rds-sg` for the Amazon RDS for PostgreSQL instance. It allows PostgreSQL connections (port **5432**) only from two sources:
 
-1. Go to the [EC2 console](https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#Home:).
-2. In the navigation pane, choose **Security Groups**.
-3. Choose Create Security Group.
+| Source | Reason |
+|---|---|
+| `app-sg` | The App server connects to the database with `psql` |
+| `bastion-sg` | pgAdmin on your computer connects through an SSH tunnel, so the connection reaches RDS from the bastion host |
 
-    ![Create EC2 SG](/images/preparation/2/1.png)
+{{% notice info %}}
+`rds-sg` does not allow any IP address, including your own. Your computer reaches the database only through the bastion host.
+{{% /notice %}}
 
-4. For **VPC**, choose the VPC where you want to create the security group.
-5. For **Security group name**, enter a descriptive name for the security group.
-6. For **Description**, enter a description for the security group.
-    
-    ![Create EC2 SG](/images/preparation/3/1.png)
+#### Create rds-sg
 
-7. Modify Inbound Rule
+1. In the [Amazon EC2 console](https://console.aws.amazon.com/ec2/), choose **Security Groups**, then choose **Create security group**. In **Basic details**:
+    - (1) **Security group name**: `rds-sg`
+    - (2) **Description**: `Allow PostgreSQL from app server and bastion host`
+    - (3) **VPC**: `rdspg-lab-vpc`
 
-    ![Create EC2 SG](/images/preparation/3/2.png)
+    ![rds-sg basic details](/images/2-preparation/2.3/1.png)
 
-8. Modify Outbound Rule
+2. In **Inbound rules**, add two rules:
+    - (1) **Type**: `PostgreSQL`, **Source type**: `Custom`, **Source**: `app-sg`
+    - (2) **Type**: `PostgreSQL`, **Source type**: `Custom`, **Source**: `bastion-sg`
 
-    ![Create EC2 SG](/images/preparation/3/3.png)
+    ![rds-sg inbound rules](/images/2-preparation/2.3/2.png)
 
-9. Click **Create**.
+{{% notice note %}}
+When you choose the **PostgreSQL** type, the protocol is set to TCP and the port to 5432 automatically.
+{{% /notice %}}
 
-    ![Create EC2 SG](/images/preparation/3/4.png)
+3. Keep the default outbound rules and choose **Create security group**. `rds-sg` now has two inbound rules on port 5432.
 
-Once you have created the security group for RDS PostgreSQL
+    ![rds-sg created](/images/2-preparation/2.3/3.png)
