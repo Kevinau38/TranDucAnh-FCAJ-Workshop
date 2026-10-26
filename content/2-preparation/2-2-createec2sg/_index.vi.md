@@ -22,7 +22,9 @@ Chỉ máy tính của bạn kết nối được tới bastion host, và chỉ 
 
 #### Tạo bastion-sg
 
-1. Mở [Amazon EC2 console](https://console.aws.amazon.com/ec2/), chọn **Security Groups** trong mục **Network & Security**, sau đó chọn **Create security group**.
+1. Mở [Amazon EC2 console](https://console.aws.amazon.com/ec2/):
+    - (1) Trong mục **Network & Security**, chọn **Security Groups**.
+    - (2) Chọn **Create security group**.
 
     ![Create security group](/images/2-preparation/2.2/1.png)
 
@@ -37,11 +39,15 @@ Chỉ máy tính của bạn kết nối được tới bastion host, và chỉ 
 Ô **VPC** mặc định là VPC default. Hãy chắc chắn bạn chọn `rdspg-lab-vpc`. Tên và mô tả của security group không thể sửa sau khi tạo.
 {{% /notice %}}
 
-3. Trong **Inbound rules**, chọn **Add rule**: (1) **Type**: `SSH`, (2) **Source type**: `My IP`.
+3. Trong **Inbound rules**, chọn **Add rule**:
+    - (1) **Type**: `SSH`
+    - (2) **Source type**: `My IP`
 
     ![bastion-sg inbound rule](/images/2-preparation/2.2/3.png)
 
-4. (1) Giữ mặc định **Outbound rules**. (2) Chọn **Create security group**.
+4. Hoàn tất tạo security group:
+    - (1) Giữ mặc định **Outbound rules**.
+    - (2) Chọn **Create security group**.
 
     ![bastion-sg outbound rule](/images/2-preparation/2.2/4.png)
 
@@ -62,7 +68,10 @@ Chỉ máy tính của bạn kết nối được tới bastion host, và chỉ 
 
     ![app-sg basic details](/images/2-preparation/2.2/6.png)
 
-7. Trong **Inbound rules**, chọn **Add rule**: (1) **Type**: `SSH`, (2) **Source type**: `Custom`, (3) **Source**: chọn `bastion-sg`.
+7. Trong **Inbound rules**, chọn **Add rule**:
+    - (1) **Type**: `SSH`
+    - (2) **Source type**: `Custom`
+    - (3) **Source**: chọn `bastion-sg`
 
     ![app-sg inbound rule](/images/2-preparation/2.2/7.png)
 

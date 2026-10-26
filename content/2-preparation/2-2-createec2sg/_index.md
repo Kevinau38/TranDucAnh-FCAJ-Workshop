@@ -22,7 +22,9 @@ Only your computer can reach the bastion host, and only the bastion host can rea
 
 #### Create bastion-sg
 
-1. Open the [Amazon EC2 console](https://console.aws.amazon.com/ec2/), choose **Security Groups** under **Network & Security**, then choose **Create security group**.
+1. Open the [Amazon EC2 console](https://console.aws.amazon.com/ec2/):
+    - (1) Under **Network & Security**, choose **Security Groups**.
+    - (2) Choose **Create security group**.
 
     ![Create security group](/images/2-preparation/2.2/1.png)
 
@@ -37,11 +39,15 @@ Only your computer can reach the bastion host, and only the bastion host can rea
 The **VPC** field defaults to your default VPC. Make sure you choose `rdspg-lab-vpc`. The security group name and description cannot be changed after creation.
 {{% /notice %}}
 
-3. In **Inbound rules**, choose **Add rule**: (1) **Type**: `SSH`, (2) **Source type**: `My IP`.
+3. In **Inbound rules**, choose **Add rule**:
+    - (1) **Type**: `SSH`
+    - (2) **Source type**: `My IP`
 
     ![bastion-sg inbound rule](/images/2-preparation/2.2/3.png)
 
-4. (1) Keep the default **Outbound rules**. (2) Choose **Create security group**.
+4. Finish creating the security group:
+    - (1) Keep the default **Outbound rules**.
+    - (2) Choose **Create security group**.
 
     ![bastion-sg outbound rule](/images/2-preparation/2.2/4.png)
 
@@ -62,7 +68,10 @@ Your public IP address may change. If you later cannot connect to the bastion ho
 
     ![app-sg basic details](/images/2-preparation/2.2/6.png)
 
-7. In **Inbound rules**, choose **Add rule**: (1) **Type**: `SSH`, (2) **Source type**: `Custom`, (3) **Source**: choose `bastion-sg`.
+7. In **Inbound rules**, choose **Add rule**:
+    - (1) **Type**: `SSH`
+    - (2) **Source type**: `Custom`
+    - (3) **Source**: choose `bastion-sg`
 
     ![app-sg inbound rule](/images/2-preparation/2.2/7.png)
 
