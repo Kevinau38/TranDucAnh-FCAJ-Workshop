@@ -1,19 +1,21 @@
 ---
-title : "Preparation Step"
+title : "Preparation steps"
 weight : 2
 chapter : false
 pre : " <b> 2. </b> "
 ---
 
+#### Overview
 
-#### Overall
-- In this section, we'll prepare all resources for series workshop about RDS PostgreSQL.
+In this chapter, you create all the AWS resources that the workshop uses, in the order of their dependencies:
 
-#### Content
- 1. [Create a VPC](2-1-createvpc/)
- 2. [Create EC2 Security Group](2-2-createec2sg/)
- 3. [Create RDS Security Group ](2-3-createrdssg/)
- 4. [Create DB Subnet Group](2-4-createdbsubnetgroup/)
- 5. [Create EC2 AppServer](2-5-createec2appsv/)
- 6. [Create EC2 bastion host](2-6-createec2bastionhost/)
- 7. [Create RDS PostgreSQl](2-7-createrdsdb/)
+| Resource | Purpose |
+| --- | --- |
+| VPC `rdspg-lab-vpc` | Network with public and private subnets in two Availability Zones |
+| Security groups `bastion-sg`, `app-sg` | Control SSH access to the bastion host and the app server |
+| Security group `rds-sg` | Allows PostgreSQL (port 5432) only from `bastion-sg` and `app-sg` |
+| DB subnet group `rdspg-lab-subnet-group` | Tells RDS which private subnets to use |
+| EC2 instances `rdspg-app-server`, `rdspg-bastion-host` | Clients that connect to the database |
+| RDS DB instance `rdspg-lab-db` | The PostgreSQL database |
+
+All resources are created in the **Asia Pacific (Singapore) ap-southeast-1** Region.

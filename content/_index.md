@@ -1,19 +1,18 @@
 ---
 title : "AWS RDS PostgreSQL"
-weight : 1 
+weight : 1
 chapter : false
 ---
-# Let start with AWS RDS PostgreSQL
+# Getting started with Amazon RDS for PostgreSQL
 
-### Overall
-In this lab, you'll learn the basics and practice of Amazon RDS PostgreSQL 
+#### Overview
 
-![intro](/images/1/2.png)
-### Content
- 1. [Introduction](1-introduce/)
- 2. [Preparation](2-preparation/)
- 3. [Start with PostgreSQL](3-startwithpostgresql/)
- 4. [Create RDS PostgreSQL Database Instance](4-Createrdspostgresql/)
- 5. [Connect to pgAdmin4](5-Connectopgadmin4/)
- 6. [Helpful Resources](6-Helpfulresources/)
- 7. [Clean up resources](7-cleanup/)
+In this workshop, you build a secure network for an Amazon RDS for PostgreSQL DB instance, connect to the database from your computer and from an EC2 instance, and practice the basics of PostgreSQL: databases, schemas, tables, roles, the system catalog, and queries.
+
+![Workshop architecture](/images/1-introduction/architecture.png)
+
+#### What you learn
+
+- Place an RDS DB instance in private subnets and control access with security groups.
+- Connect to a private database with pgAdmin 4 through an SSH tunnel, and with `psql` over TLS from an EC2 instance.
+- Understand how PostgreSQL organizes data and permissions on Amazon RDS.

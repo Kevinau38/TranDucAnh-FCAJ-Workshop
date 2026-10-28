@@ -1,18 +1,18 @@
 ---
 title : "AWS RDS PostgreSQL"
-weight : 1 
+weight : 1
 chapter : false
 ---
-# Bắt đầu với AWS RDS PostgreSQL
-### Tổng quan
- Trong bài thực hành này, Bạn sẽ tìm hiểu và thực hành những kiến thức cơ bản về Amazon RDS PostgreSQL. 
- 
- ![intro](/images/1/2.png)
-### Nội dung
- 1. [Giới thiệu](1-introduce/)
- 2. [Các bước chuẩn bị](2-preparation/)
- 3. [Bắt đầu với PostgreSQL](3-startwithpostgresql/)
- 4. [Tạo RDS PostgreSQL Database instance](4-Createrdspostgresql/)
- 5. [Kết nối đến pgAdmin4](5-Connectopgadmin4/)
- 6. [Nguồn học](6-Helpfulresources/)
- 7. [Clean up](7-cleanup/)
+# Bắt đầu với Amazon RDS for PostgreSQL
+
+#### Tổng quan
+
+Trong workshop này, bạn xây dựng hạ tầng mạng an toàn cho một Amazon RDS for PostgreSQL DB instance, kết nối tới cơ sở dữ liệu từ máy tính của bạn và từ một EC2 instance, đồng thời thực hành các kiến thức cơ bản của PostgreSQL: database, schema, bảng, role, system catalog và truy vấn.
+
+![Workshop architecture](/images/1-introduction/architecture.png)
+
+#### Bạn sẽ học được
+
+- Đặt RDS DB instance trong private subnet và kiểm soát truy cập bằng security group.
+- Kết nối tới cơ sở dữ liệu private bằng pgAdmin 4 qua SSH tunnel, và bằng `psql` qua TLS từ EC2 instance.
+- Hiểu cách PostgreSQL tổ chức dữ liệu và phân quyền trên Amazon RDS.
