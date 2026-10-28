@@ -1,55 +1,68 @@
 ---
-title : "Session parameters"
+title : "Session Parameters"
 weight : 6
 chapter : false
 pre : " <b> 4.6. </b> "
 ---
 
- {{% notice note%}}
- This chapter assumes you have completed the Basic DML chapter. If you haven't, please complete the Basic DML module before proceeding.
- {{% /notice %}}
+#### Overview
 
- This chapter will talk about [PostgreSQL Parameters](https://www.postgresql.org/docs/11/runtime-config.html) . Specifically, it will focus on parameters that can be changed at the session-level. For system-wide parameters, you would leverage RDS/Aurora's Parameter Group mechanism.
+PostgreSQL behavior is controlled by **parameters**. Some parameters apply to the whole DB instance, and some can be changed for a single **session** (one connection).
 
- 1. In pgAdmin, click on the rdspg-fcj-labs node, then click on **Dashboard**, then click on **Configuration**.
-    ![parametter](/images/2/2-7/49.png)
+| Scope | How to change | Takes effect |
+|---|---|---|
+| Whole DB instance | Edit the **DB parameter group** in Amazon RDS, for example `default.postgres18` from step 2.7 | Immediately or after a reboot, depending on the parameter |
+| One session | Run `SET` in the session | Immediately, only for the current connection |
 
- This shows you the current setting of all the **PostgreSQL parameter settings**.
+#### View parameters
 
- 2. In the search box, type **``search``**
-   ![parametter](/images/2/2-7/50.png)
+Run each statement in the Query Tool of **first_database**: (1) enter the statement, (2) choose **Execute**.
 
- This filters down the list of parameter settings.
+1. List the parameters that a user can change for a session:
 
- 3. Click on **first_database**, then choose **Query Tool** icon. Then paste and run the following SQL:
-    ```SELECT * FROM pg_settings where context = 'user';```
-    ![parametter](/images/2/2-7/51.png)
+    ```sql
+    SELECT name, setting, context FROM pg_settings WHERE context = 'user' ORDER BY name;
+    ```
 
- This shows you the parameter sessions that can be changed for a session, as well as their current setting.
+    ![User-level parameters](/images/4-postgresql/4.6/1.png)
 
- 4. Paste and run the following SQL:
-    ```show search_path```
-    ![parametter](/images/2/2-7/52.png)
-    The ``SHOW`` command is another way to view the current value of a setting for your session.
+2. Show the current value of `search_path`:
 
- 5. Paste and run the following SQL:
-    ```show all```
-    ![parametter](/images/2/2-7/53.png)
-    This shows you yet another way to view the current value of all of the parameter settings for your session.
+    ```sql
+    SHOW search_path;
+    ```
 
- 6. Paste and try the following SQL:
- ```select * from first_table;```
- ![parametter](/images/2/2-7/54.png)
-  This fails because PostgreSQL is not able to find a table named **first_table** in the schemas in the current **search_path**.\
- 7. Paste and try the following SQL:
- ```SET search_path TO first_schema, public;   ```
- ![parametter](/images/2/2-7/55.png)
+    The default value is `"$user", public`. PostgreSQL first looks for a schema with the same name as the current user, then in `public`.
 
- 8. Paste and try the following SQL again:
-  ```select * from first_table;```
-  ![parametter](/images/2/2-7/56.png)
- This now works because we updated the **search_path** parameter setting for our session.
+    ![SHOW search_path](/images/4-postgresql/4.6/2.png)
 
- {{% notice tip%}}
- When making changes to system parameters via RDS/Aurora Parameter Groups, it is a good idea to confirm that your parameter change has been applied by using one of the techniques above, such as "SHOW ALL", to confirm that the expected parameter value is in effect. Sometimes people can be confused because their Parameter Group change can be made but the actual parameter setting change does not happen [until the next reboot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Troubleshooting.html#CHAP_Troubleshooting.Parameters). Confirming the value using "SHOW ALL" or one of the other methods can save you confusion and time
- {{% /notice %}}
+#### Change a session parameter
+
+3. Query `first_table` without the schema name:
+
+    ```sql
+    SELECT * FROM first_table;
+    ```
+
+    The query fails with `relation "first_table" does not exist` because `first_schema` is not in `search_path`.
+
+    ![Table not found](/images/4-postgresql/4.6/3.png)
+
+4. Add `first_schema` to `search_path` for this session, then run the query again:
+
+    ```sql
+    SET search_path TO first_schema, public;
+    SELECT * FROM first_table;
+    ```
+
+    The query now returns `my first row`.
+
+    ![SET search_path](/images/4-postgresql/4.6/4.png)
+
+{{% notice note %}}
+`SET` changes the value only for the current session. Other connections, and new connections, still use the default value. Run `RESET search_path;` to return to the default value in the current session.
+{{% /notice %}}
+
+{{% notice tip %}}
+After you change a parameter in a DB parameter group, confirm the value that is in effect with `SHOW` or `pg_settings`. Some parameters change only after the DB instance reboots, so the value in the parameter group and the value in effect can be different.
+{{% /notice %}}

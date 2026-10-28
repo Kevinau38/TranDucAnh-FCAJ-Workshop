@@ -1,47 +1,59 @@
 ---
-title : "Catalog and Data dictionary"
+title : "Catalog và Data Dictionary"
 weight : 5
 chapter : false
 pre : " <b> 4.5. </b> "
 ---
 
-Chương này giới thiệu PostgreSQL [Data Dictionary](https://www.postgresql.org/docs/11/ddl-schemas.html#DDL-SCHEMAS-CATALOG).
+#### Tổng quan
 
- #### The pg_catalog schema
+PostgreSQL lưu thông tin về chính các đối tượng của nó, như bảng, cột, role và phiên kết nối, trong các bảng và view hệ thống. Tập hợp này được gọi là **system catalog** hay **data dictionary**.
 
- Ngoài các public schemas do người dùng tạo, mỗi cơ sở dữ liệu còn chứa một pg_catalog schema, chứa các bảng hệ thống và tất cả các kiểu dữ liệu, hàm và toán tử tích hợp sẵn.
+| Nguồn | Chuẩn | Mô tả |
+|---|---|---|
+| `pg_catalog` | Riêng PostgreSQL | Các bảng và view hệ thống, đều có tiền tố `pg_`. Database nào cũng có schema này |
+| `information_schema` | Chuẩn SQL | Các view mô tả đối tượng database theo cùng một cách trên PostgreSQL, MySQL, SQL Server và các hệ quản trị khác |
 
- Đây là một tập hợp các bảng được sử dụng để lưu trữ siêu dữ liệu động và tĩnh cho cơ sở dữ liệu PostgreSQL và có thể được coi là “từ điển dữ liệu” cho cơ sở dữ liệu. Các bảng này được sử dụng cho các hoạt động thuộc loại “sổ sách kế toán” nội bộ. Tất cả các bảng danh mục Hệ thống đều bắt đầu bằng tiền tố pg_* và có thể tìm thấy trong [pg_catalog schema](https://www.postgresql.org/docs/11/catalogs-overview.html)
+#### Xem catalog trong pgAdmin
 
- 1. Trong pgAdmin, hãy mở rộng nút **rdspg-fcj-labs**, sau đó mở rộng nút **Databases**, sau đó mở rộng nút **first_database**, sau đó mở rộng nút **Catalogs**, sau đó mở rộng **PostgreSQL Catalog**, sau đó mở rộng **Tables**.
-  ![catalog](/images/2/2-6/43.png)
+1. Trong **Object Explorer**, mở **first_database** > **Catalogs** > **PostgreSQL Catalog (pg_catalog)**. pgAdmin nhóm các đối tượng catalog theo loại.
 
- Bạn có thể xem các bảng trong [pg_catalog schema](https://www.postgresql.org/docs/11/catalogs-overview.html).
+    ![PostgreSQL Catalog](/images/4-postgresql/4.5/1.png)
 
- 2. Nhấp vào **first_database**, sau đó chọn biểu tượng **Query Tool**
+#### Truy vấn catalog
 
- 3. Dán và chạy lệnh này để xem ví dụ về truy vấn trực tiếp **pg_catalog**: s
-  ```select * from pg_tables where schemaname='pg_catalog';```
-  ![catalog](/images/2/2-6/44.png)
+Chạy từng câu lệnh trong Query Tool của **first_database**: (1) nhập câu lệnh, (2) chọn **Execute**.
 
-#### The Statistics Collector Views (also part of pg_catalog)
+2. Liệt kê các bảng hệ thống trong `pg_catalog`:
 
- Trình thu thập số liệu thống kê là một hệ thống con đặc biệt thu thập thông tin động thời gian chạy về các hoạt động hiện tại trong phiên bản cơ sở dữ liệu. Ví dụ: [số lượt xem của người thu thập số liệu thống kê](https://www.postgresql.org/docs/11/monitoring-stats.html#MONITORING-STATS-DYNAMIC-VIEWS-TABLE) rất hữu ích để xác định tần suất truy cập một bảng cụ thể và liệu bảng có được quét hoặc truy cập bằng chỉ mục hay không.
- 1. Dán và chạy lệnh này để xem ví dụ về một trong các chế độ xem **Statistics Collector**:
+    ```sql
+    SELECT tablename FROM pg_tables WHERE schemaname = 'pg_catalog' ORDER BY tablename;
+    ```
 
-  ```SELECT * FROM pg_stat_activity WHERE STATE = 'active';```
+    ![pg_catalog tables](/images/4-postgresql/4.5/2.png)
 
-  ![catalog](/images/2/2-6/45.png)
+3. Xem các phiên kết nối hiện tại bằng view `pg_stat_activity`:
 
-2.  Nhấp vào nút **rds-pg-labs**. Sau đó nhấp vào **Dashboard**. Sau đó nhấp vào **Sessions** trong phần Hoạt động của máy chủ.
-  ![catalog](/images/2/2-6/46.png)
+    ```sql
+    SELECT pid, usename, datname, application_name, state FROM pg_stat_activity WHERE datname IS NOT NULL;
+    ```
 
-  Tại đây, pgAdmin đang hiển thị cho bạn thông tin **pg_stat_activity** tương tự cho cụm PostgreSQL của bạn.
+    Kết quả hiển thị các phiên pgAdmin của bạn với user `postgres`, và các phiên khác đang mở, ví dụ `first_user` từ `psql`. Các phiên `rdsadmin` là kết nối nội bộ Amazon RDS dùng để quản lý instance.
 
- {{% notice tip%}}
- [Performance Insights](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.html) là một cách tuyệt vời để trực quan hóa hoạt động hiện tại và lịch sử cũng như đợi các sự kiện. Chúng tôi khuyến khích bạn bắt đầu với Thông tin chi tiết về hiệu suất để chẩn đoán liên quan đến hiệu suất.
- {{% /notice %}}
+    ![pg_stat_activity](/images/4-postgresql/4.5/3.png)
 
- 3. Dán và chạy lệnh này để xem ví dụ về một trong các chế độ xem **Statistics Collector**:
-  ```select * from information_schema.tables;```
-   ![catalog](/images/2/2-6/48.png) 
+4. Liệt kê các bảng trong `first_schema` bằng `information_schema` theo chuẩn SQL:
+
+    ```sql
+    SELECT table_schema, table_name, table_type FROM information_schema.tables WHERE table_schema = 'first_schema';
+    ```
+
+    ![information_schema.tables](/images/4-postgresql/4.5/4.png)
+
+{{% notice info %}}
+`pg_stat_activity` thuộc **cumulative statistics system**. Từ PostgreSQL 15, các số liệu thống kê này được lưu trong shared memory thay vì qua một tiến trình statistics collector riêng.
+{{% /notice %}}
+
+{{% notice tip %}}
+Để chẩn đoán hiệu năng trên Amazon RDS, hãy dùng **CloudWatch Database Insights**, tính năng bạn đã giữ ở mức Standard ở bước 2.7. Nó hiển thị tải database và wait event ở hiện tại lẫn trong quá khứ.
+{{% /notice %}}

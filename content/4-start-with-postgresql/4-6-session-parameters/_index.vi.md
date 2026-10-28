@@ -1,51 +1,68 @@
 ---
-title : "Session parameters"
+title : "Session Parameter"
 weight : 6
 chapter : false
 pre : " <b> 4.6. </b> "
 ---
 
- Phần này sẽ nói về [PostgreSQL Parameters](https://www.postgresql.org/docs/11/runtime-config.html) . Cụ thể, nó sẽ tập trung vào các thông số có thể thay đổi ở cấp độ phiên. Đối với các tham số trên toàn hệ thống, bạn sẽ tận dụng cơ chế Parameter Group của RDS/Aurora.
+#### Tổng quan
 
- 1. Trong pgAdmin, nhấp vào nút rdspg-fcj-labs, sau đó nhấp vào **Dashboard**, sau đó nhấp vào **Configuration**.
- ![parametter](/images/2/2-7/49.png)
+Hoạt động của PostgreSQL được điều khiển bằng các **parameter**. Một số parameter áp dụng cho toàn bộ DB instance, một số có thể thay đổi riêng cho từng **session** (một kết nối).
 
- Phần này hiển thị cho bạn cài đặt hiện tại của tất cả **PostgreSQL parameter settings**.
+| Phạm vi | Cách thay đổi | Hiệu lực |
+|---|---|---|
+| Toàn bộ DB instance | Sửa **DB parameter group** trong Amazon RDS, ví dụ `default.postgres18` ở bước 2.7 | Ngay lập tức hoặc sau khi reboot, tùy parameter |
+| Một session | Chạy `SET` trong session | Ngay lập tức, chỉ cho kết nối hiện tại |
 
- 2. Trong thanh tìm kiếm, gõ **``search``**
- ![parametter](/images/2/2-7/50.png)
+#### Xem parameter
 
-Lọc danh sách cài đặt tham số.
+Chạy từng câu lệnh trong Query Tool của **first_database**: (1) nhập câu lệnh, (2) chọn **Execute**.
 
- 3. Nhấp vào **first_database**, sau đó chọn biểu tượng **Query Tool**. Sau đó dán và chạy SQL sau:
- ```SELECT * FROM pg_settings where context = 'user';```
- ![parametter](/images/2/2-7/51.png)
+1. Liệt kê các parameter mà user có thể thay đổi cho session:
 
-  Lệnh này hiển thị cho bạn các phiên tham số có thể được thay đổi cho một phiên cũng như cài đặt hiện tại của chúng.
+    ```sql
+    SELECT name, setting, context FROM pg_settings WHERE context = 'user' ORDER BY name;
+    ```
 
- 4. Dán và chạy câu lệnh SQL sau:
- ```show search_path```
- ![parametter](/images/2/2-7/52.png)
- Lệnh ``SHOW`` là một cách khác để xem giá trị hiện tại của cài đặt của bạn.
+    ![User-level parameters](/images/4-postgresql/4.6/1.png)
 
- 5. Dán và chạy câu lệnh SQL sau:
- ```show all```
-  ![parametter](/images/2/2-7/53.png)
- Lệnh này chỉ cho bạn một cách khác để xem giá trị hiện tại của tất cả cài đặt tham số của bạn.
+2. Xem giá trị hiện tại của `search_path`:
 
- 6. Dán và chạy câu lệnh SQL sau:
- ```select * from first_table;```
- ![parametter](/images/2/2-7/54.png)
-  Lệnh này không thành công vì PostgreSQL không thể tìm thấy bảng có tên **first_table** trong các lược đồ ở **search_path** hiện tại.\
- 7. Dán và chạy câu lệnh SQL sau:
- ```SET search_path TO first_schema, public;   ```
- ![parametter](/images/2/2-7/55.png)
+    ```sql
+    SHOW search_path;
+    ```
 
- 8. Dán và chạy lại câu lệnh SQL sau:
-  ```select * from first_table;```
-  ![parametter](/images/2/2-7/56.png)
-Lệnh này hiện đã hoạt động vì chúng ta đã cập nhật cài đặt tham số **search_path**.
+    Giá trị mặc định là `"$user", public`. PostgreSQL tìm trước trong schema trùng tên với user hiện tại, sau đó tới `public`.
 
- {{% notice tip%}}
- Khi thực hiện các thay đổi đối với tham số hệ thống thông qua RDS/Aurora Parameter Groups, bạn nên xác nhận rằng thay đổi tham số của mình đã được áp dụng bằng cách sử dụng một trong các kỹ thuật ở trên, chẳng hạn như "SHOW ALL", để xác nhận rằng giá trị tham số dự kiến là có hiệu lực. Đôi khi mọi người có thể nhầm lẫn vì có thể thực hiện thay đổi Nhóm tham số nhưng thay đổi cài đặt tham số thực tế không xảy ra [cho đến lần khởi động lại tiếp theo](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Troubleshooting.html#CHAP_Troubleshooting.Parameter). Xác nhận giá trị bằng cách sử dụng "SHOW ALL" hoặc một trong các phương pháp khác có thể giúp bạn tránh nhầm lẫn và mất thời gian
- {{% /notice %}} 
+    ![SHOW search_path](/images/4-postgresql/4.6/2.png)
+
+#### Thay đổi session parameter
+
+3. Truy vấn `first_table` mà không ghi tên schema:
+
+    ```sql
+    SELECT * FROM first_table;
+    ```
+
+    Câu truy vấn báo lỗi `relation "first_table" does not exist` vì `first_schema` không nằm trong `search_path`.
+
+    ![Table not found](/images/4-postgresql/4.6/3.png)
+
+4. Thêm `first_schema` vào `search_path` cho session này, rồi chạy lại câu truy vấn:
+
+    ```sql
+    SET search_path TO first_schema, public;
+    SELECT * FROM first_table;
+    ```
+
+    Câu truy vấn trả về `my first row`.
+
+    ![SET search_path](/images/4-postgresql/4.6/4.png)
+
+{{% notice note %}}
+`SET` chỉ thay đổi giá trị cho session hiện tại. Các kết nối khác và kết nối mới vẫn dùng giá trị mặc định. Chạy `RESET search_path;` để đưa về giá trị mặc định trong session hiện tại.
+{{% /notice %}}
+
+{{% notice tip %}}
+Sau khi sửa parameter trong DB parameter group, hãy kiểm tra giá trị đang có hiệu lực bằng `SHOW` hoặc `pg_settings`. Một số parameter chỉ thay đổi sau khi DB instance reboot, nên giá trị trong parameter group và giá trị đang có hiệu lực có thể khác nhau.
+{{% /notice %}}
