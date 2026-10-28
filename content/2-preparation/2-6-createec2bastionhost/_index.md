@@ -59,9 +59,9 @@ The bastion host needs a public IP address so that you can connect to it over SS
 #### Verify the instance
 
 6. Open the instance `rdspg-bastion-host` and check:
-    - (1) **Instance state**: **Running**
-    - (2) **Public IPv4 address**: has a value
-    - (3) **Private IPv4 address**: an address in `10.0.0.0/20`
+    - **Instance state**: **Running**
+    - **Public IPv4 address**: has a value
+    - **Private IPv4 address**: an address in `10.0.0.0/20`
 
     ![Instance summary](/images/2-preparation/2.6/6.png)
 

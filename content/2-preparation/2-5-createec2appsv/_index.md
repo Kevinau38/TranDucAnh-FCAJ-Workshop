@@ -71,8 +71,8 @@ The subnet shows **4091** available IP addresses. A `/20` subnet has 4,096 addre
 #### Verify the instance
 
 7. Open the instance `rdspg-app-server` and check:
-    - (1) **Instance state**: **Running**
-    - (2) **Private IPv4 address**: an address in `10.0.128.0/20`
-    - (3) **Public IPv4 address**: empty
+    - **Instance state**: **Running**
+    - **Private IPv4 address**: an address in `10.0.128.0/20`
+    - **Public IPv4 address**: empty
 
     ![Instance summary](/images/2-preparation/2.5/7.png)

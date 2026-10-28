@@ -71,8 +71,8 @@ Subnet hiển thị **4091** địa chỉ IP khả dụng. Subnet `/20` có 4.09
 #### Kiểm tra instance
 
 7. Mở instance `rdspg-app-server` và kiểm tra:
-    - (1) **Instance state**: **Running**
-    - (2) **Private IPv4 address**: một địa chỉ thuộc `10.0.128.0/20`
-    - (3) **Public IPv4 address**: trống
+    - **Instance state**: **Running**
+    - **Private IPv4 address**: một địa chỉ thuộc `10.0.128.0/20`
+    - **Public IPv4 address**: trống
 
     ![Instance summary](/images/2-preparation/2.5/7.png)

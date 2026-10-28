@@ -59,9 +59,9 @@ Bastion host cần địa chỉ IP công khai để bạn SSH tới từ máy t�
 #### Kiểm tra instance
 
 6. Mở instance `rdspg-bastion-host` và kiểm tra:
-    - (1) **Instance state**: **Running**
-    - (2) **Public IPv4 address**: có giá trị
-    - (3) **Private IPv4 address**: một địa chỉ thuộc `10.0.0.0/20`
+    - **Instance state**: **Running**
+    - **Public IPv4 address**: có giá trị
+    - **Private IPv4 address**: một địa chỉ thuộc `10.0.0.0/20`
 
     ![Instance summary](/images/2-preparation/2.6/6.png)
 
