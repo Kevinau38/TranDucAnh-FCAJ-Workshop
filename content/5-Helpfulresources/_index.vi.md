@@ -5,14 +5,18 @@ chapter : false
 pre : " <b> 5. </b> "
 ---
 
+#### Tài liệu chính thức
 
-Dưới đây là một số liên kết đến nội dung bổ sung có liên quan:
+- [Amazon RDS for PostgreSQL User Guide](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html)
+- [Lịch phát hành các phiên bản Amazon RDS for PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/PostgreSQLReleaseNotes/postgresql-release-calendar.html)
+- [Tài liệu PostgreSQL](https://www.postgresql.org/docs/current/)
+- [Tài liệu pgAdmin 4](https://www.pgadmin.org/docs/pgadmin4/latest/)
+
+#### AWS Database Blog
 
 - [Managing PostgreSQL users and roles](https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/)
-- [RDS for PostgreSQL](https://aws.amazon.com/blogs/database/category/database/amazon-rds/rds-for-postgresql/) 
+- [Các bài viết về RDS for PostgreSQL](https://aws.amazon.com/blogs/database/category/database/amazon-rds/rds-for-postgresql/)
 - [Common administrator responsibilities on Amazon RDS and Amazon Aurora for PostgreSQL databases](https://aws.amazon.com/blogs/database/common-administrator-responsibilities-on-amazon-rds-and-aurora-for-postgresql-databases/)
-- [Using IAM authentication to connect with pgAdmin Amazon Aurora PostgreSQL or Amazon RDS for PostgreSQL](https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/) 
-- [Securing Amazon RDS and Aurora PostgreSQL database access with IAM authentication](https://aws.amazon.com/blogs/database/securing-amazon-rds-and-aurora-postgresql-database-access-with-iam-authentication/)
+- [Using IAM authentication to connect with pgAdmin to Amazon Aurora PostgreSQL or Amazon RDS for PostgreSQL](https://aws.amazon.com/blogs/database/using-iam-authentication-to-connect-with-pgadmin-amazon-aurora-postgresql-or-amazon-rds-for-postgresql/)
 - [Working with RDS and Aurora PostgreSQL logs: Part 1](https://aws.amazon.com/blogs/database/working-with-rds-and-aurora-postgresql-logs-part-1/)
 - [Working with RDS and Aurora PostgreSQL logs: Part 2](https://aws.amazon.com/blogs/database/working-with-rds-and-aurora-postgresql-logs-part-2/)
-
