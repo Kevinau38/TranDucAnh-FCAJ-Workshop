@@ -5,82 +5,188 @@ chapter : false
 pre : " <b> 2.7. </b> "
 ---
 
+#### Tổng quan
 
-#### Để tạo 1 RDS PostgreSQL DB, làm theo các bước dưới đây
- 
-1. Truy cập đến giao diện **Amazon RDS** [console](https://console.aws.amazon.com/rds/).
-    ![Create EC2 SG](/images/preparation/db/1.png)
+Ở bước này, bạn tạo `rdspg-lab-db`, một Amazon RDS for PostgreSQL DB instance nằm trong private subnet, sử dụng mạng và các security group đã tạo ở các bước trước.
 
-2. Click **Create database**.
-3. Tại mục **Database engine**, chọn **PostgreSQL**.
-4. Tại mục **Version**, chọn version PostgreSQL bạn muốn sử dụng.
+| Thiết lập | Giá trị | Lý do |
+|---|---|---|
+| Cách tạo | Full configuration | Tự chọn VPC, DB subnet group và security group |
+| Engine version | PostgreSQL 18.6-R1 | Phiên bản mới nhất tại thời điểm cập nhật workshop |
+| Template | Sandbox | Giới hạn lựa chọn ở các cấu hình chi phí thấp, phục vụ học tập |
+| Deployment | Single-AZ DB instance | Workshop không cần instance standby |
+| Instance class | `db.t4g.micro` | Thuộc gói miễn phí, dùng chip Graviton |
+| Storage | gp3, 20 GiB, tắt autoscaling | Dung lượng tối thiểu, đủ cho workshop |
+| Credentials | Self managed | Secrets Manager tính phí cho mỗi secret hằng tháng |
+| Compute resource | Don't connect to an EC2 compute resource | Bạn đã tạo `rds-sg` ở bước 2.3 |
+| Public access | No | Database chỉ truy cập được từ bên trong VPC |
+| Security group | Chỉ `rds-sg` | Chỉ cho phép cổng 5432 từ `app-sg` và `bastion-sg` |
+| Deletion protection | Tắt | Để xóa được database ở bước dọn dẹp tài nguyên |
 
-    ![Create EC2 SG](/images/preparation/db/2.png)
+#### Chọn engine và template
 
-5. Tại mục **Template**, chọn template cho db instance của bạn. Template là cấu hình được khởi tạo trước cho DB instance
+1. Mở [Amazon RDS console](https://console.aws.amazon.com/rds/):
+    - (1) Chọn **Databases**.
+    - (2) Chọn **Create database**.
+    - (3) Chọn **Full configuration**.
 
-    ![Create EC2 SG](/images/preparation/db/3.png)
+    ![Create database](/images/2-preparation/2.7/1.png)
 
-6. Tại mục **Availability** và **Durability**, DB instance identifier, đặt tên cho Tại mục DB instance.
+2. Chọn engine và template:
+    - (1) **Engine type**: **PostgreSQL**
+    - (2) **Database creation method**: **Full configuration**
+    - (3) **Templates**: **Sandbox**
 
-    ![Create EC2 SG](/images/preparation/db/4.png)
+    ![Engine and template](/images/2-preparation/2.7/2.png)
 
-7. Tại mục **DB instance identifier**, nhập một tên duy nhất cho rds instance.
-8. Tại mục **Master username**, nhập tên người dùng cho người dùng chính của rds instance. 
-9. Tại mục **Master password**, nhập mật khẩu cho người dùng chính của rds instance.
+{{% notice warning %}}
+Template mặc định là **Production**, sẽ chọn sẵn Multi-AZ và cấu hình lớn. Hãy chắc chắn bạn chọn **Sandbox**.
+{{% /notice %}}
 
-    ![Create EC2 SG](/images/preparation/db/5.png)
+3. Trong **Availability and durability**:
+    - (1) Chọn **Single-AZ DB instance deployment (1 instance)**.
 
-10. Tại mục **DB instance class**, chọn instance class mà bạn muốn sử dụng cho db instance của mình. Instance class sẽ xác định số CPU và bộ nhớ được phân bổ cho db instance của bạn.
+    ![Availability and durability](/images/2-preparation/2.7/3.png)
 
-![Create EC2 SG](/images/preparation/db/6.png)
+{{% notice info %}}
+Với template Sandbox, các lựa chọn Multi-AZ bị vô hiệu hóa. **Multi-AZ DB instance** gồm một primary và một standby không phục vụ đọc. **Multi-AZ DB cluster** gồm một primary và hai standby đọc được. **Single-AZ** không có standby và không có dữ liệu dự phòng, chấp nhận được cho lab nhưng không dùng cho production.
+{{% /notice %}}
 
-11. Tại mục **Storage**, chọn dung lượng lưu trữ mà bạn muốn phân bổ cho db instance của mình.
+#### Cấu hình settings và credentials
 
-    ![Create EC2 SG](/images/preparation/db/7.png)
+4. Trong **Settings**:
+    - (1) **Engine version**: **PostgreSQL 18.6-R1**
+    - (2) Không chọn **Enable RDS Extended Support**.
+    - (3) **DB instance identifier**: `rdspg-lab-db`
+    - (4) **Master username**: `postgres`
 
-12. Tại mục **Connectivity**, chọn **Connect to a EC2 compute resource**, sau đó chọn **App server** instance mà bạn đã tạo.
+    ![Settings](/images/2-preparation/2.7/4.png)
 
-    ![Create EC2 SG](/images/preparation/db/8.png)
+{{% notice note %}}
+**RDS Extended Support** là dịch vụ trả phí giúp tiếp tục chạy một major version sau khi hết thời gian hỗ trợ chuẩn. PostgreSQL 18 còn mới nên bạn không cần.
+{{% /notice %}}
 
-13. Tại mục **DB subnet group**, chọn DB subnet group mà bạn muốn sử dụng cho DB instance của mình.
-14. Tại mục **VPC security groups**, chọn security group mà bạn muốn sử dụng cho DB instance của mình.
+5. Trong **Credentials management**:
+    - (1) Chọn **Self managed**.
+    - (2) Không chọn **Auto generate password**.
+    - (3) Nhập **Master password**.
+    - (4) Nhập lại mật khẩu ở **Confirm master password**.
+    - (5) **Database authentication options**: **Password authentication**
 
-    ![Create EC2 SG](/images/preparation/db/9.png)
+    ![Credentials](/images/2-preparation/2.7/5.png)
 
-15. Click vào **Additional configuration**, Nhập **5432** cho **database port**
+{{% notice warning %}}
+Lưu master password ở nơi an toàn, bên ngoài thư mục workshop. Bạn cần mật khẩu này để kết nối tới database, và RDS không hiển thị lại. Mật khẩu không được chứa các ký tự `/`, `'`, `"` hoặc `@`.
+{{% /notice %}}
 
-    ![Create EC2 SG](/images/preparation/db/10.png)
+#### Cấu hình instance và storage
 
-16. Tại mục **Database authentication**, chọn phương thức mà bạn muốn sử dụng
+6. Trong **Instance configuration** và **Storage**:
+    - (1) Chọn **Burstable classes (includes t classes)**.
+    - (2) **Instance type**: `db.t4g.micro`
+    - (3) **Storage type**: **General Purpose SSD (gp3)**
+    - (4) **Allocated storage**: `20` GiB
 
-    ![Create EC2 SG](/images/preparation/db/11.png)
+    ![Instance and storage](/images/2-preparation/2.7/6.png)
 
-17. Tại mục **Monitoring**, chọn các tùy chọn giám sát mà bạn muốn sử dụng cho phiên bản cơ sở dữ liệu của mình
+7. Trong **Additional storage configuration**:
+    - (1) Bỏ chọn **Enable storage autoscaling**.
 
-    ![Create EC2 SG](/images/preparation/db/12.png)
+    ![Storage autoscaling](/images/2-preparation/2.7/7.png)
 
-18. Click vào **Additional configuration**:
-- Tại mục **Database option**, điền tên cho cơ sở dữ liệu bạn muốn tạo sau khi khởi chạy RDS PostgreSQL 
-- Tại mục **DB parameter group**, giữ cấu hình mặc định
+{{% notice tip %}}
+Với gp3 dưới 400 GiB, RDS cung cấp sẵn 3.000 IOPS và 125 MiBps mà không tính thêm phí. Storage autoscaling được tắt vì RDS không thể giảm dung lượng sau khi đã tăng.
+{{% /notice %}}
 
-    ![Create EC2 SG](/images/preparation/db/13.png)
+#### Cấu hình kết nối
 
-19. Tại mục **Backup**, chọn các tùy chọn sao lưu mà bạn muốn sử dụng cho db instance của mình.
+8. Trong **Connectivity**:
+    - (1) **Compute resource**: **Don't connect to an EC2 compute resource**
+    - (2) **Network type**: **IPv4**
+    - (3) **Virtual private cloud (VPC)**: `rdspg-lab-vpc`
+    - (4) **DB subnet group**: `rdspg-lab-subnet-group`
 
-    ![Create EC2 SG](/images/preparation/db/14.png)
+    ![Connectivity](/images/2-preparation/2.7/8.png)
 
-20. Click **Create database**.
+{{% notice warning %}}
+Bạn không thể đổi VPC sau khi database đã được tạo.
+{{% /notice %}}
 
-Database instance của bạn sẽ được tạo và hiển thị trong danh sách các database instance. Bạn có thể kết nối với nó bằng ứng dụng PostgreSQL client, chẳng hạn như psql, pgAdmin4. Để thực hiện việc này, bạn sẽ cần hostname, port, tên người dùng và mật khẩu cho db instance của bạn.
+9. Tiếp tục trong **Connectivity**:
+    - (1) **Public access**: **No**
+    - (2) **VPC security group (firewall)**: **Choose existing**
+    - (3) **Existing VPC security groups**: chỉ chọn `rds-sg`. Xóa `default` nếu đang được chọn.
+    - (4) **Availability Zone**: **No preference**
 
-**Dưới đây là một số điều cần lưu ý khi tạo cơ sở dữ liệu RDS PostgreSQL:**
-{{%expand "Click here" %}}
-- Bạn chỉ có thể tạo một RDS PostgreSQL DB trong VPC nằm trong cùng AWS region với công cụ cơ sở dữ liệu mà bạn dự định sử dụng.
-- Bạn phải chọn instance class tương thích với phiên bản PostgreSQL mà bạn muốn sử dụng.
-- Bạn có thể chọn tạo db instance của mình trong một Availability Zone (AZ) hoặc trong nhiều AZ. Nếu chọn tạo db instance trong nhiều AZ, bạn sẽ có thể tận dụng các tính năng high availability và disaster recovery
-- Bạn có thể chọn bật mã hóa cho db instance của mình. Điều này sẽ mã hóa dữ liệu của bạn khi lưu trữ và truyền tải.
-- Bạn có thể chọn bật sao lưu cho db instance    của mình. Điều này sẽ cho phép bạn khôi phục cơ sở dữ liệu của mình về thời điểm trước đó nếu có sự cố.
-{{% /expand%}}
+    ![Public access and security group](/images/2-preparation/2.7/9.png)
 
+10. Trong **Additional configuration** của **Connectivity**:
+    - (1) Giữ **Database port** là `5432`.
 
+    ![Database port](/images/2-preparation/2.7/10.png)
+
+{{% notice note %}}
+Không chọn **Create an RDS Proxy** và giữ **Certificate authority** mặc định. Inbound rule của `rds-sg` cho phép cổng 5432, vì vậy không đổi port.
+{{% /notice %}}
+
+#### Cấu hình monitoring và tạo database
+
+11. Trong **Monitoring**:
+    - (1) Giữ **Database Insights - Standard**.
+    - (2) Giữ **Retention period** là **7 days (free)**.
+
+    ![Monitoring](/images/2-preparation/2.7/11.png)
+
+{{% notice info %}}
+Giữ các thiết lập mặc định sau:
+- **Enhanced Monitoring**, **Log exports** và **DevOps Guru**: tắt, vì sẽ phát sinh phí.
+- **Initial database name**: để trống. PostgreSQL luôn có sẵn database mặc định `postgres`.
+- **DB parameter group**: `default.postgres18`. Parameter group chứa cấu hình của toàn bộ DB instance.
+- **Encryption**: bật, dùng khóa do AWS quản lý `aws/rds`.
+- **Automated backup**: bật, thời gian lưu giữ 1 ngày.
+- **Auto minor version upgrade**: bật. RDS tự nâng minor version (ví dụ 18.6 lên 18.7) trong khung giờ bảo trì.
+{{% /notice %}}
+
+12. Ở cuối trang:
+    - (1) Không chọn **Enable deletion protection**.
+    - (2) Chọn **Create database**.
+
+    ![Create database](/images/2-preparation/2.7/12.png)
+
+13. Đợi khoảng 10 đến 15 phút đến khi **Status** của `rdspg-lab-db` là **Available**.
+
+    ![Database available](/images/2-preparation/2.7/13.png)
+
+#### Kiểm tra database
+
+14. Chọn `rdspg-lab-db`, sau đó mở tab **Connectivity & security**:
+    - (1) Tại **Connect using**, chọn **Code snippets**.
+
+    Phần **Connection steps** hiển thị endpoint và lệnh `psql` bạn sẽ dùng ở bước sau. **Internet access gateway** là **Disabled**.
+
+    ![Code snippets](/images/2-preparation/2.7/14.png)
+
+15. Tại **Connect using**:
+    - (1) Chọn **Endpoints**.
+
+    ![Endpoints](/images/2-preparation/2.7/15.png)
+
+16. Trong **Additional configurations**, kiểm tra:
+    - **Endpoint** và **Port** `5432`
+    - **VPC**: `rdspg-lab-vpc` và **Subnet group**: `rdspg-lab-subnet-group`
+    - **VPC security groups**: `rds-sg`, **Active**
+    - **Publicly accessible**: **No**
+
+    ![Connectivity and security](/images/2-preparation/2.7/16.png)
+
+17. Trong **Security group rules**, kiểm tra `rds-sg` có hai inbound rule, một từ `app-sg` và một từ `bastion-sg`.
+
+    ![Security group rules](/images/2-preparation/2.7/17.png)
+
+{{% notice tip %}}
+Sao chép **Endpoint** và lưu cùng với master password. Mọi kết nối ở các chương sau đều dùng endpoint này.
+{{% /notice %}}
+
+{{% notice warning %}}
+Từ bây giờ, RDS instance và hai EC2 instance được tính phí theo giờ. Nếu tạm dừng workshop lâu, hãy stop chúng. RDS sẽ tự khởi động lại DB instance đã stop sau 7 ngày.
+{{% /notice %}}
