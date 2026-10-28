@@ -26,7 +26,7 @@ languageName = "English"
 [[Languages.en.menu.shortcuts]]
 name = "<i class='fab fa-aws'></i> AWS Study Group - Blog"
 identifier = "AWS Study Group"
-url = "https://aws.amazon.com/blogs"
+url = "https://awsfcaj.com"
 weight = 20
 
 [[Languages.en.menu.shortcuts]]
@@ -43,7 +43,7 @@ languageName = "Tiếng Việt"
 [[Languages.vi.menu.shortcuts]]
 name = "<i class='fab fa-aws'></i> AWS Study Group - Blog"
 identifier = "AWS Study Group"
-url = "https://aws.amazon.com/blogs"
+url = "https://awsfcaj.com"
 weight = 20
 
 [[Languages.vi.menu.shortcuts]]

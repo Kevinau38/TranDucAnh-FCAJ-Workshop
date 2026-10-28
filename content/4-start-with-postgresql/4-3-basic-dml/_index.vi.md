@@ -1,82 +1,99 @@
- ---
-title : "Basic DML (Data Manipulation Language)"
+---
+title : "DML cơ bản (Data Manipulation Language)"
 weight : 3
 chapter : false
 pre : " <b> 4.3. </b> "
 ---
 
- Chương này sẽ nói về **truy vấn và DML cơ bản**.
- 
+#### Tổng quan
 
-#### Chèn dữ liệu vào bảng
- 1. Trong pgAdmin tool, nhấp chuột phải vào **first_table** bên dưới **first_schema** bên trong **first_database** của bạn. Chọn **Scripts**, sau đó nhấp vào **INSERT Script**
- ![insert data](/images/2/2-4/16.png)
- Điều này sẽ tạo ra một câu lệnh chèn mẫu soạn sẵn cho bảng mà chúng ta có thể chỉnh sửa.\
+**DML** (Data Manipulation Language) là nhóm câu lệnh SQL làm việc với dữ liệu trong bảng: `INSERT`, `SELECT`, `UPDATE` và `DELETE`. Ở bước này, bạn chạy SQL trực tiếp trong **Query Tool** của pgAdmin.
 
- 2. Làm nổi bật ? giữ chỗ và thay thế nó bằng `'hàng đầu tiên của tôi'`. Đừng quên sử dụng dấu ngoặc đơn `'` để bao quanh văn bản của bạn.
- ![insert data](/images/2/2-4/17.png)
+{{% notice info %}}
+Bước này dùng bảng `first_schema.first_table` đã tạo ở bước 4.2.
+{{% /notice %}}
 
- 
- 3. Nhấp vào biểu tượng Play để thực hiện lệnh này.
- Lệnh này sẽ chạy lệnh của bạn và chèn hàng đầu tiên của bạn.
- ![insert data](/images/2/2-4/18.png)
- {{%expand "'CHÈN 0 1' nghĩa là gì?" %}}Số 1 trong INSERT 0 1 có nghĩa là nó đã chèn 1 hàng. Số 0 chỉ áp dụng được nếu bảng sử dụng OID PostgreSQL cổ điển (Mã định danh đối tượng) và nếu vậy thì số 0 đại diện cho OID thực tế được tạo. Nếu không, nó sẽ luôn trả về giá trị 0. Ngày nay, bạn có thể sẽ không tạo bảng bằng OID, nhưng nếu tò mò, bạn có thể đọc thêm về OID trong tài liệu.{{% /expand%}}
- {{%expand "Hàng của tôi có được cam kết không?" %}}
- Theo mặc định, pgAdmin được đặt ở chế độ bật AutoCommit, vì vậy, hàng mới này phải được cam kết. Bạn có thể xem/thay đổi chế độ AutoCommit bằng cách nhấp vào biểu tượng bên cạnh biểu tượng Play trong Trình soạn thảo truy vấn pgAdmin:
- {{% /expand%}}
+#### Mở Query Tool
 
-#### Truy vấn bảng đầu tiên của chúng tôi
+1. Trong **Object Explorer**:
+    - (1) Chuột phải **first_database**.
+    - (2) Chọn **Query Tool**.
 
- 1. Trong pgAdmin của bạn, nhấp chuột phải vào **first_table** bên dưới **first_schema** bên trong **first_database** của bạn. Chọn Tập lệnh, sau đó nhấp vào **CHỌN Scripts**
- ![select](/images/2/2-4/19.png)
+    ![Query Tool](/images/4-postgresql/4.3/1.png)
 
- 2. Nhấp vào biểu tượng Play để thực hiện lệnh này.
-  ![select](/images/2/2-4/20.png)
- Lệnh này sẽ chạy lệnh của bạn và bạn sẽ thấy hàng đầu tiên của mình.
- ![select](/images/2/2-4/21.png)
+{{% notice tip %}}
+Bạn cũng có thể mở Query Tool bằng **Alt + Shift + Q**. Query Tool kết nối tới database đang được chọn, hiển thị ở thanh phía trên vùng soạn lệnh.
+{{% /notice %}}
 
+#### Thêm và truy vấn dữ liệu
 
-#### Tạo bảng bảng thứ hai nếu chưa tồn tại
- 1. Sử dụng một trong các trình soạn thảo truy vấn, dán lệnh tạo sau đây rồi nhấp vào biểu tượng Play để thực thi lệnh đó:
-    ``` 
-    create table if not exists first_schema.second_table(
-        col_pk serial,
-        col_money numeric(12,2),
+2. Thêm dòng đầu tiên:
+    - (1) Nhập câu lệnh sau.
+    - (2) Chọn **Execute** (hoặc nhấn **F5**).
+
+    ```sql
+    INSERT INTO first_schema.first_table (col1) VALUES ('my first row');
+    ```
+
+    Tab **Messages** hiển thị `INSERT 0 1`. Số `1` là số dòng đã thêm.
+
+    ![INSERT](/images/4-postgresql/4.3/2.png)
+
+{{% notice note %}}
+pgAdmin mặc định bật **auto-commit**, nên dòng mới được commit ngay.
+{{% /notice %}}
+
+3. Thay câu lệnh và chạy:
+    - (1) Nhập câu lệnh sau.
+    - (2) Chọn **Execute**.
+
+    ```sql
+    SELECT * FROM first_schema.first_table;
+    ```
+
+    ![SELECT](/images/4-postgresql/4.3/3.png)
+
+#### Tạo bảng thứ hai và trả về giá trị tự sinh
+
+4. Thay bằng khối lệnh sau và chạy:
+    - (1) Nhập các câu lệnh.
+    - (2) Chọn **Execute**.
+
+    ```sql
+    CREATE TABLE IF NOT EXISTS first_schema.second_table (
+        col_pk        integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        col_money     numeric(12,2),
         col_short_str varchar(100),
-        col_datetime timestamp(0) without time zone
-      );
-    ```
-    ![add table](/images/2/2-4/22.png)
+        col_datetime  timestamp(0)
+    );
 
-#### Chèn vào bảng thứ hai
- 1. Sử dụng một trong các trình soạn thảo truy vấn mở, dán lệnh chèn sau rồi nhấp vào biểu tượng Play để thực thi lệnh đó:
-
+    INSERT INTO first_schema.second_table (col_money, col_short_str, col_datetime)
+    VALUES (40.25, 'short string', TIMESTAMP '2026-10-29 10:23:54')
+    RETURNING col_pk;
     ```
-    INSERT INTO first_schema.second_table(
-      col_money, col_short_str, col_datetime)
-      VALUES (40.25, 'short string', TIMESTAMP '2004-10-19 10:23:54') 
-    returning col_pk;
-    ```
-    ![insert data to table](/images/2/2-4/23.png)
 
- Lưu ý rằng vì chúng ta đã chỉ định `returning col_pk`, nên chúng ta thấy giá trị duy nhất được tạo tự động của col_pk trong phần Data Output. Hãy nhớ rằng khi tạo bảng thứ hai, chúng ta đã chỉ định rằng col_pk đã sử dụng kiểu dữ liệu `SERIAL` (giống như kiểu dữ liệu AUTO_INCREMENT trong các công cụ cơ sở dữ liệu khác).
+    `col_pk` là **identity column**, nên PostgreSQL tự sinh giá trị. `RETURNING col_pk` trả về giá trị vừa sinh là `1` mà không cần truy vấn thêm.
 
-#### Thử nghiệm chuyển đổi kiểu dữ liệu
- 1. Sử dụng trình soạn thảo truy vấn đang mở, dán lệnh chọn sau và nhấp vào biểu tượng Play để thực thi lệnh đó:
-    ```
-    SELECT '40.25' col1, 40.25 col2;
-    ```
-    ![datatype](/images/2/2-4/24.png)
-  Lưu ý trong phần Data Output  `col1` là kiểu dữ liệu text  trong khi `col2` là kiểu dữ liệu numeric .
-  {{% notice note%}}
-  Không giống như một số cơ sở dữ liệu khác (cụ thể là Oracle), bạn không cần phải có mệnh đề FROM trong câu lệnh SELECT của mình. Vì vậy, nếu bạn có thói quen viết `SELECT 'something' FROM dual` trong Oracle, bạn có thể tắt `FROM Dual` trong PostgreSQL. Không có bảng `dual` trong PostgreSQL.
-  {{% /notice %}}
+    ![RETURNING](/images/4-postgresql/4.3/4.png)
 
- 2. Bây giờ hãy chạy truy vấn này:
+{{% notice info %}}
+`GENERATED ALWAYS AS IDENTITY` là cách tạo cột tự tăng theo chuẩn SQL. Code PostgreSQL cũ thường dùng `serial`, hoạt động tương tự.
+{{% /notice %}}
 
-    ```
-    SELECT '40.25' col1, 40.25 col2, '40.25'::numeric col3, numeric '40.25' col4, cast('40.25' as numeric) col5;
-    ```
-    ![datatype](/images/2/2-4/25.png)
+#### Chuyển đổi kiểu dữ liệu
 
- Lưu ý trong phần Dữ liệu đầu ra `col3`, `col4` và `col5` đều là ví dụ về kiểu dữ liệu text đã được chuyển đổi thành kiểu dữ liệu numeric . 3 cột này trình bày 3 cách mà bạn có thể thực hiện chuyển đổi kiểu dữ liệu trong câu lệnh SQL PostgreSQL.
+5. Thay câu lệnh và chạy:
+    - (1) Nhập câu lệnh sau.
+    - (2) Chọn **Execute**.
+
+    ```sql
+    SELECT '40.25' AS col1, 40.25 AS col2, '40.25'::numeric AS col3, CAST('40.25' AS numeric) AS col4;
+    ```
+
+    **Data Output** hiển thị kiểu dữ liệu dưới tên mỗi cột. `col1` là `text` vì giá trị nằm trong dấu nháy. `col3` và `col4` chuyển chuỗi sang `numeric` bằng `::` và `CAST`.
+
+    ![Type conversion](/images/4-postgresql/4.3/5.png)
+
+{{% notice note %}}
+Khác với Oracle, câu `SELECT` trong PostgreSQL không bắt buộc có mệnh đề `FROM`, và PostgreSQL không có bảng `dual`.
+{{% /notice %}}

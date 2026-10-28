@@ -4,102 +4,89 @@ weight : 4
 chapter : false
 pre : " <b> 4.4. </b> "
 ---
- {{% notice note%}}
- This chapter assumes you have completed the Basic DML chapter. If you haven't, please complete the Basic DML module before proceeding.
- {{% /notice %}}
 
- This chapter will talk about [PostgreSQL Roles](https://www.postgresql.org/docs/11/user-manag.html) . In PostgreSQL, a role encompasses the concept of both users and groups. The CREATE USER and CREATE GROUP statements are actually aliases for the CREATE ROLE statement. The difference is that a user is role with the **LOGIN** privilege.
+#### Overview
 
- Roles are defined at the PostgreSQL cluster level and are valid in all databases within the cluster. Role are not created specific to an individual database.
- 
- 
- {{% notice info%}}
- In PostgreSQL, schemas are distinct concept from roles/users. This is different than databases such as Oracle.
- {{% /notice %}}
- #### Exploring Existing Roles
+In PostgreSQL, a **role** covers both users and groups. A **user** is simply a role with the `LOGIN` attribute. `CREATE USER` and `CREATE GROUP` are aliases of `CREATE ROLE`.
 
- In pgAdmin, expand the **Login/Group Roles** item under your PostgreSQL server.
-    ![role](/images/2/2-5/26.png)
+Roles are defined at the DB instance level and are valid in every database of the instance. Schemas and roles are separate concepts, unlike Oracle, where a schema is tied to a user.
 
-  You will see the existing and [default roles](https://www.postgresql.org/docs/11/default-roles.html)  defined in this PostgreSQL cluster. Notice that there are 2 types of icons that pgAdmin uses for roles. If the role has **LOIGN** privileges, then it is drawn as a user (such as rdsadmin and masteruser). Otherwise, it is displayed with a group icon.\
+In this step, you create:
 
+| Role | Login | Privileges |
+|---|---|---|
+| `first_role` | No | Read `first_schema.first_table` only |
+| `first_user` | Yes | Member of `first_role`, so it inherits the same privileges |
 
- You can also retrieve this same information by running the following sql query:
-  
-  ``` SELECT rolname FROM pg_roles;```
+#### Explore existing roles
 
- ![role](/images/2/2-5/27.png)
+1. In the Query Tool of **first_database**, run:
+    - (1) Enter the statement.
+    - (2) Choose **Execute**.
 
-#### Create a new Role
-
- 1. Right-click on **Login/Group Roles**, then choose **Create**, then choose **Login/Group role**:
-  ![role](/images/2/2-5/28.png)
-
- 2. Name the role ``first_role``.
-  ![role](/images/2/2-5/28.png)
-
- 3. Browse through the other tabs of the Create role dialog, but don't change anything. End up on the SQL tab. Then click Save.
- ![role](/images/2/2-5/30.png)
-
- 4. Right-click on **first_database** and choose **Query Tool** icon.
- ![role](/images/2/2-5/31.png)
- 5. Paste and run the following SQL to grant some [privileges](https://www.postgresql.org/docs/11/ddl-priv.html)  to your new role.
+    ```sql
+    SELECT rolname, rolsuper, rolcanlogin FROM pg_roles
+    WHERE rolname NOT LIKE 'pg\_%' ORDER BY rolname;
     ```
+
+    ![Existing roles](/images/4-postgresql/4.4/1.png)
+
+| Role | Description |
+|---|---|
+| `postgres` | The master user. `rolsuper` is `false` because Amazon RDS does not give you a real superuser |
+| `rds_superuser` | The role that grants the master user its administrative privileges |
+| `rdsadmin` | The real superuser that Amazon RDS uses to manage the instance |
+
+#### Create a role and a user
+
+2. Replace the statement with the following block and run it:
+    - (1) Enter the statements.
+    - (2) Choose **Execute**.
+
+    ```sql
+    CREATE ROLE first_role;
     GRANT USAGE ON SCHEMA first_schema TO first_role;
     GRANT SELECT ON first_schema.first_table TO first_role;
+
+    CREATE ROLE first_user WITH LOGIN PASSWORD 'FirstUser#2026';
+    GRANT first_role TO first_user;
     ```
-    ![role](/images/2/2-5/32.png)
- {{% notice note%}}
- we have granted the role both the ability to SELECT from the table, and also the ability to use the schema that contains the table.
- {{% /notice %}}
 
-#### Create a new User
+    ![Create role and user](/images/4-postgresql/4.4/2.png)
 
- 1. Right-click on **Login/Group Roles**, then choose **Create**, then choose **Login/Group role**:
-    ![role](/images/2/2-5/33.png)  
+{{% notice note %}}
+A role needs two privileges to read a table in a schema: `USAGE` on the schema and `SELECT` on the table. Without `USAGE`, the role cannot access any object in the schema.
+{{% /notice %}}
 
- 2. Name the role ``first_user``.
-  ![role](/images/2/2-5/34.png)
+3. In **Object Explorer**, right-click **Login/Group Roles** and choose **Refresh**. `first_role` appears with a group icon, and `first_user` appears with a user icon because it can log in.
 
-  3. Click on the **Definition** tab. Then enter a Password you will remember
-  ![role](/images/2/2-5/35.png)
+    ![Roles in Object Explorer](/images/4-postgresql/4.4/3.png)
 
- 4. Click on the **Privileges** tab. Then set **Can login?** to **Yes**
-  ![role](/images/2/2-5/36.png)
+#### Test the privileges
 
- 5. Click on the **Membership** tab. Then click in the Roles field and pick ``first_role``
-  ![role](/images/2/2-5/37.png)
+4. Connect to the App server (`ssh rdspg-app`) and log in as `first_user`. Enter `FirstUser#2026` when prompted.
 
- 6. Finally, click on the **SQL** tab to see what the **SQL** looks like. Then **Save**
-  ![role](/images/2/2-5/38.png)
+    ```bash
+    export RDSHOST="<RDS_ENDPOINT>"
+    psql "host=$RDSHOST port=5432 dbname=first_database user=first_user sslmode=verify-full sslrootcert=./global-bundle.pem"
+    ```
 
- Now, right-click on the **Servers** node and choose **Create**, then click **Server**
+    Run each query on its own line:
 
+    ```sql
+    SELECT * FROM first_schema.first_table;
+    ```
 
- 7. Name the new connection ``first_user_connection``\
- 8. Click on the **Connection** tab. Enter the RDS endpoint for the hostname (see notes below if you need help finding it). Enter ``first_user`` for the Username. Enter your **Password** you just defined for the new user. Then click **Save**.
-  ![role](/images/2/2-5/39.png)
+    ```sql
+    SELECT * FROM first_schema.second_table;
+    ```
 
- 9. Expand the **first_user_connection** node, then expand **Databases**. Right-click on **first_database**, then choose **Query Tool** to open up a session as first_user.
-   ![role](/images/2/2-5/40.png)
+    `first_user` can read `first_table`, but it gets `permission denied` for `second_table` because `first_role` has no privilege on that table.
 
- 10. Paste and run this SQL to see if our **first_role** grants work:
-    ```select * from first_schema.first_table;```
-    ![role](/images/2/2-5/41.png)
+    ![Test privileges](/images/4-postgresql/4.4/4.png)
 
- 11. Paste and run this SQL to test a table that we have not granted to **first_role**:
-    ```select * from first_schema.second_table;```
-      ![role](/images/2/2-5/42.png)
+5. Type `\q` to exit `psql`.
 
- {{% notice tip%}}
- Read more about [best practices for PostgreSQL User/Role management](https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/)
- {{% /notice %}}
-  {{%expand " Want to create additional DBA users (similar to masteruser) for your RDS or Aurora PostgreSQL instance? " %}}
- Try [this script](https://aws.amazon.com/premiumsupport/knowledge-center/rds-aurora-postgresql-clone-master-user/) :
- ```
- --replace thepassword with a real password
- CREATE ROLE new_dba_user WITH PASSWORD 'thepassword' CREATEDB CREATEROLE LOGIN;
- GRANT rds_superuser TO new_dba_user;
-
- ```
- {{% /expand%}}
+{{% notice tip %}}
+Grant privileges to group roles, then add users to those roles. When a person changes jobs, you change their role membership instead of every table privilege. See [Managing PostgreSQL users and roles](https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/) for best practices on Amazon RDS.
+{{% /notice %}}

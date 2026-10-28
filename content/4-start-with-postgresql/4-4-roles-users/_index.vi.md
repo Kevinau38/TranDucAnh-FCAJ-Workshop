@@ -1,103 +1,92 @@
 ---
-title : "Roles và Users"
+title : "Role và User"
 weight : 4
 chapter : false
 pre : " <b> 4.4. </b> "
 ---
- Chương này sẽ nói về [PostgreSQL Roles](https://www.postgresql.org/docs/11/user-manag.html) . Trong PostgreSQL, Roles bao hàm khái niệm về cả người dùng và nhóm. Các câu lệnh CREATE USER và CREATE GROUP thực chất là bí danh của câu lệnh CREATE ROLE. Sự khác biệt là người dùng có vai trò với đặc quyền **LOGIN**.
 
- Roles được xác định ở cấp cụm PostgreSQL và có giá trị trong tất cả các cơ sở dữ liệu trong cụm. Roles không được tạo cụ thể cho một cơ sở dữ liệu riêng lẻ.
- 
- 
- {{% notice info%}}
-Trong PostgreSQL, schemas là khái niệm khác biệt với roles/users. Điều này khác với cơ sở dữ liệu như Oracle. {{% /notice %}}
- #### Exploring Existing Roles
+#### Tổng quan
 
- Trong pgAdmin, hãy mở rộng mục **Login/Group Roles** trong PostgreSQL server.
+Trong PostgreSQL, **role** bao gồm cả user và group. **User** đơn giản là một role có thuộc tính `LOGIN`. `CREATE USER` và `CREATE GROUP` đều là tên gọi khác của `CREATE ROLE`.
 
-  ![role](/images/2/2-5/26.png)
+Role được định nghĩa ở cấp DB instance và có hiệu lực trong mọi database của instance. Schema và role là hai khái niệm tách biệt, khác với Oracle nơi schema gắn với một user.
 
-  Bạn sẽ thấy các [default roles][https://www.postgresql.org/docs/11/default-roles.html) đã có và được xác định trong cụm PostgreSQL này. Lưu ý rằng có 2 loại biểu tượng mà pgAdmin sử dụng cho roles. Nếu roles có đặc quyền **LOIGN** thì roles đó sẽ được xác định là người dùng (chẳng hạn như rdsadmin và masteruser). Nếu không, nó sẽ được hiển thị với biểu tượng group.\
+Ở bước này, bạn tạo:
 
-Bạn cũng có thể truy xuất thông tin tương tự bằng cách chạy truy vấn sql sau:
+| Role | Đăng nhập | Quyền |
+|---|---|---|
+| `first_role` | Không | Chỉ đọc `first_schema.first_table` |
+| `first_user` | Có | Thành viên của `first_role`, nên thừa hưởng cùng quyền |
 
- ``` SELECT rolname FROM pg_roles;```
+#### Xem các role có sẵn
 
- ![role](/images/2/2-5/27.png)
+1. Trong Query Tool của **first_database**, chạy:
+    - (1) Nhập câu lệnh.
+    - (2) Chọn **Execute**.
 
-#### Tạo Role
-
- 1. Nhấp chuột phải vào **ĐLogin/Group Roles**, sau đó chọn **Create**, sau đó chọn **Login/Group role**:
-  ![role](/images/2/2-5/28.png)
-
- 2. Đặt tên cho role: ``first_role``.
-  ![role](/images/2/2-5/28.png)
-
- 3. Duyệt qua các tab khác của hộp thoại Create Role nhưng không thay đổi bất cứ điều gì. Kết thúc trên tab SQL. Sau đó nhấp vào **Save**.
- ![role](/images/2/2-5/30.png)
-
- 4. Nhấp chuột phải vào **first_database** và chọn biểu tượng **Query Tool**.
- ![role](/images/2/2-5/31.png)
- 5. Dán và chạy câu lệnh SQL sau để cấp một số [đặc quyền](https://www.postgresql.org/docs/11/ddl-priv.html) cho vai trò mới của bạn.
+    ```sql
+    SELECT rolname, rolsuper, rolcanlogin FROM pg_roles
+    WHERE rolname NOT LIKE 'pg\_%' ORDER BY rolname;
     ```
+
+    ![Existing roles](/images/4-postgresql/4.4/1.png)
+
+| Role | Mô tả |
+|---|---|
+| `postgres` | Master user. `rolsuper` là `false` vì Amazon RDS không cấp superuser thật cho bạn |
+| `rds_superuser` | Role cấp quyền quản trị cho master user |
+| `rdsadmin` | Superuser thật mà Amazon RDS dùng để quản lý instance |
+
+#### Tạo role và user
+
+2. Thay bằng khối lệnh sau và chạy:
+    - (1) Nhập các câu lệnh.
+    - (2) Chọn **Execute**.
+
+    ```sql
+    CREATE ROLE first_role;
     GRANT USAGE ON SCHEMA first_schema TO first_role;
     GRANT SELECT ON first_schema.first_table TO first_role;
+
+    CREATE ROLE first_user WITH LOGIN PASSWORD 'FirstUser#2026';
+    GRANT first_role TO first_user;
     ```
-    ![role](/images/2/2-5/32.png)
 
- 
- {{% notice note%}}
- Chúng tôi đã cấp cho vai trò cả khả năng SELECT từ bảng và cả khả năng sử dụng schemas chứa bảng.
- {{% /notice %}}
+    ![Create role and user](/images/4-postgresql/4.4/2.png)
 
-#### Tạo người dùng mới
+{{% notice note %}}
+Để đọc một bảng trong schema, role cần hai quyền: `USAGE` trên schema và `SELECT` trên bảng. Thiếu `USAGE` thì role không truy cập được đối tượng nào trong schema.
+{{% /notice %}}
 
- 1. Nhấp chuột phải vào **Login/Group Roles**, sau đó chọn **Create**, sau đó chọn **Login/Group role**:
-    ![role](/images/2/2-5/33.png)
+3. Trong **Object Explorer**, chuột phải **Login/Group Roles** và chọn **Refresh**. `first_role` hiển thị với biểu tượng nhóm, còn `first_user` hiển thị biểu tượng người vì đăng nhập được.
 
- 2. Đặt tên cho role ``first_user``.
-    ![role](/images/2/2-5/34.png)
+    ![Roles in Object Explorer](/images/4-postgresql/4.4/3.png)
 
- 3. Click on the **Definition** tab. Then enter a Password you will remember.
-    ![role](/images/2/2-5/35.png)
+#### Kiểm tra quyền
 
- 4. Nhấp vào tab **Privileges**. Sau đó đặt **Can login?** thành **Yes**
-    ![role](/images/2/2-5/36.png)
+4. Kết nối tới App server (`ssh rdspg-app`) và đăng nhập bằng `first_user`. Nhập `FirstUser#2026` khi được hỏi.
 
- 5. Nhấp vào tab **Membership**. Sau đó nhấp vào trường Roles và chọn ``first_role``
-    ![role](/images/2/2-5/37.png)
-
- 6. Cuối cùng, nhấp vào tab **SQL** để xem **SQL** trông như thế nào. Sau đó **Save**
-    ![role](/images/2/2-5/38.png)
-
- Bây giờ, nhấp chuột phải vào nút **Servers** và chọn **Create**, sau đó nhấp vào **Server**
-
- 7. Đặt tên cho kết nối mới ``first_user_connection``\
- 8. Nhấp vào tab **Connection**. Nhập RDS endpoint cho tên máy chủ (xem ghi chú bên dưới nếu bạn cần trợ giúp). Nhập ``first_user`` cho Tên người dùng. Nhập **Mật khẩu** cho người dùng mới. Sau đó nhấp vào **Save**.
-  ![role](/images/2/2-5/39.png)
-
- 9. Mở rộng nút **first_user_connection**, sau đó mở rộng **Databases**. Nhấp chuột phải vào **first_database**, sau đó chọn **Query Tool** để mở phiên với tư cách first_user.
-   ![role](/images/2/2-5/40.png)
-
- 10. Dán và chạy câu lệnh SQL này
+    ```bash
+    export RDSHOST="<RDS_ENDPOINT>"
+    psql "host=$RDSHOST port=5432 dbname=first_database user=first_user sslmode=verify-full sslrootcert=./global-bundle.pem"
     ```
-    select * from first_schema.first_table;
-    ```
-    ![role](/images/2/2-5/41.png)
 
- 11. Dán và chạy câu lệnh SQL này để kiểm tra bảng mà chúng ta chưa cấp cho **first_role**:
-    ```select * from first_schema.second_table;```
-    ![role](/images/2/2-5/42.png)
-  {{% notice tip%}}
- Đọc thêm về [các phương pháp hay nhất để quản lý User/Role dùng PostgreSQL](https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/)
- {{% /notice %}}
+    Chạy từng câu truy vấn trên một dòng riêng:
 
-{{%expand " Bạn muốn tạo thêm người dùng DBA (tương tự như người dùng chính) cho phiên bản RDS hoặc Aurora PostgreSQL của mình? " %}}
-    Hãy thử [tập lệnh này](https://aws.amazon.com/premiumsupport/know-center/rds-aurora-postgresql-clone-master-user/):
+    ```sql
+    SELECT * FROM first_schema.first_table;
     ```
-    --replace thepassword with a real password
-    CREATE ROLE new_dba_user WITH PASSWORD 'thepassword' CREATEDB CREATEROLE LOGIN;
-    GRANT rds_superuser TO new_dba_user;
 
+    ```sql
+    SELECT * FROM first_schema.second_table;
     ```
-    {{% /expand%}}    
+
+    `first_user` đọc được `first_table`, nhưng bị `permission denied` với `second_table` vì `first_role` không có quyền trên bảng đó.
+
+    ![Test privileges](/images/4-postgresql/4.4/4.png)
+
+5. Gõ `\q` để thoát `psql`.
+
+{{% notice tip %}}
+Hãy cấp quyền cho group role, rồi thêm user vào role đó. Khi một người đổi vị trí công việc, bạn chỉ cần đổi role của họ thay vì sửa quyền trên từng bảng. Xem [Managing PostgreSQL users and roles](https://aws.amazon.com/blogs/database/managing-postgresql-users-and-roles/) để biết các best practice trên Amazon RDS.
+{{% /notice %}}
