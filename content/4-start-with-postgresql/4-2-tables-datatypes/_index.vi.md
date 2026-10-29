@@ -1,5 +1,5 @@
 ---
-title : "Table và Datatype"
+title : "Table và kiểu dữ liệu"
 weight : 2
 chapter : false
 pre : " <b> 4.2. </b> "

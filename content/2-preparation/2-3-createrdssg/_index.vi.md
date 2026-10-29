@@ -7,7 +7,7 @@ pre : " <b> 2.3. </b> "
 
 #### Tổng quan
 
-Ở bước này, bạn tạo `rds-sg` cho Amazon RDS for PostgreSQL. Security group này chỉ cho phép kết nối PostgreSQL (cổng **5432**) từ hai nguồn:
+Ở bước này, bạn tạo `rds-sg` cho Amazon RDS for PostgreSQL DB instance. Security group này chỉ cho phép kết nối PostgreSQL (cổng **5432**) từ hai nguồn:
 
 | Nguồn | Lý do |
 |---|---|

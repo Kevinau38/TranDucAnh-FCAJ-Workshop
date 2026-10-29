@@ -1,5 +1,5 @@
 ---
-title : "Tables and Datatypes"
+title : "Tables and Data Types"
 weight : 2
 chapter : false
 pre : " <b> 4.2. </b> "
