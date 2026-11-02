@@ -8,7 +8,7 @@ Workshops of the **AWS Study Group – First Cloud AI Journey (FCAJ)** that I, *
 
 | ID | Workshop | Status | Website |
 | --- | --- | --- | --- |
-| 000114 | [AWS RDS PostgreSQL (Postgres Database Workshop 1)](000114-postgres-database-workshop-1/) | In review | https://000114.awsfcaj.com |
+| 000114 | [AWS RDS PostgreSQL (Postgres Database Workshop 1)](000114-postgres-database-workshop-1/) | Published | https://000114.awsfcaj.com |
 
 ## What "updated" means
 
@@ -48,7 +48,7 @@ Các workshop của **AWS Study Group – First Cloud AI Journey (FCAJ)** do mì
 
 | ID | Workshop | Trạng thái | Website |
 | --- | --- | --- | --- |
-| 000114 | [AWS RDS PostgreSQL (Postgres Database Workshop 1)](000114-postgres-database-workshop-1/) | Đang review | https://000114.awsfcaj.com |
+| 000114 | [AWS RDS PostgreSQL (Postgres Database Workshop 1)](000114-postgres-database-workshop-1/) | Đã xuất bản | https://000114.awsfcaj.com |
 
 Với mỗi workshop, mình:
 
