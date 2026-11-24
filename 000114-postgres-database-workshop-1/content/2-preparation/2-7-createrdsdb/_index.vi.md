@@ -13,7 +13,7 @@ pre : " <b> 2.7. </b> "
 |---|---|---|
 | Cách tạo | Full configuration | Tự chọn VPC, DB subnet group và security group |
 | Engine version | PostgreSQL 18.6-R1 | Phiên bản mới nhất tại thời điểm cập nhật workshop |
-| Template | Sandbox | Giới hạn lựa chọn ở các cấu hình chi phí thấp, phục vụ học tập |
+| Template | Free tier | Giới hạn lựa chọn ở các cấu hình chi phí thấp, thuộc Free Tier |
 | Deployment | Single-AZ DB instance | Workshop không cần instance standby |
 | Instance class | `db.t4g.micro` | Thuộc gói miễn phí, dùng chip Graviton |
 | Storage | gp3, 20 GiB, tắt autoscaling | Dung lượng tối thiểu, đủ cho workshop |
@@ -35,12 +35,12 @@ pre : " <b> 2.7. </b> "
 2. Chọn engine và template:
     - (1) **Engine type**: **PostgreSQL**
     - (2) **Database creation method**: **Full configuration**
-    - (3) **Templates**: **Sandbox**
+    - (3) **Templates**: **Free tier**
 
     ![Engine and template](/images/2-preparation/2.7/2.png)
 
 {{% notice warning %}}
-Template mặc định là **Production**, sẽ chọn sẵn Multi-AZ và cấu hình lớn. Hãy chắc chắn bạn chọn **Sandbox**.
+Template mặc định là **Production**, sẽ chọn sẵn Multi-AZ và cấu hình lớn. Hãy chắc chắn bạn chọn **Free tier**.
 {{% /notice %}}
 
 3. Trong **Availability and durability**:
@@ -49,7 +49,7 @@ Template mặc định là **Production**, sẽ chọn sẵn Multi-AZ và cấu 
     ![Availability and durability](/images/2-preparation/2.7/3.png)
 
 {{% notice info %}}
-Với template Sandbox, các lựa chọn Multi-AZ bị vô hiệu hóa. **Multi-AZ DB instance** gồm một primary và một standby không phục vụ đọc. **Multi-AZ DB cluster** gồm một primary và hai standby đọc được. **Single-AZ** không có standby và không có dữ liệu dự phòng, chấp nhận được cho lab nhưng không dùng cho production.
+Với template Free tier, các lựa chọn Multi-AZ bị vô hiệu hóa. **Multi-AZ DB instance** gồm một primary và một standby không phục vụ đọc. **Multi-AZ DB cluster** gồm một primary và hai standby đọc được. **Single-AZ** không có standby và không có dữ liệu dự phòng, chấp nhận được cho lab nhưng không dùng cho production.
 {{% /notice %}}
 
 #### Cấu hình settings và credentials

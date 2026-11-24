@@ -107,7 +107,7 @@ Tạo file bằng PowerShell thay vì Notepad. Notepad có thể lưu thành `co
 
 | Trường | Giá trị | Ý nghĩa |
 |---|---|---|
-| Host Address | `10.0.130.72` | Endpoint trỏ về một IP private bên trong VPC |
+| Host Address | `10.0.152.9` | Endpoint trỏ về một IP private bên trong VPC |
 | SSL Connection | `true` | Kết nối được mã hóa và chứng chỉ máy chủ đã được xác thực |
 | Superuser | `off` | Master user không phải superuser của PostgreSQL. Trên Amazon RDS, user này mang role `rds_superuser`, còn superuser thật do AWS giữ để quản lý instance |
 

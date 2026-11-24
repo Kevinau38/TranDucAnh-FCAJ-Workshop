@@ -55,7 +55,7 @@ Example from the current website:
     [Languages.en]
     title = "Documentation for Hugo Learn Theme"
     weight = 1
-    languageName = "English"
+    label = "English"
 
     [[Languages.en.menu.shortcuts]] 
     name = "<i class='fab fa-github'></i> Github repo"
@@ -82,7 +82,7 @@ Example from the current website:
     [Languages.fr]
     title = "Documentation du thème Hugo Learn"
     weight = 2
-    languageName = "Français"
+    label = "Français"
 
     [[Languages.fr.menu.shortcuts]]
     name = "<i class='fab fa-github'></i> Repo Github"

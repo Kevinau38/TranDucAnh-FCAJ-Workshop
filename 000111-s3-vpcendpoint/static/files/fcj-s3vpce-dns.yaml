@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: FCJ Workshop 000111 - Route 53 resources for the on-premises DNS simulation
+Resources:
+  S3PrivateZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Sub s3.${AWS::Region}.amazonaws.com
+      HostedZoneConfig:
+        Comment: FCJ workshop - resolves S3 to the S3 interface endpoint
+      VPCs:
+        - VPCId: !ImportValue fcj-s3vpce-VpcCloud
+          VPCRegion: !Ref AWS::Region
+  InboundResolver:
+    Type: AWS::Route53Resolver::ResolverEndpoint
+    Properties:
+      Name: fcj-inbound-cloud
+      Direction: INBOUND
+      SecurityGroupIds: [!ImportValue fcj-s3vpce-EndpointSG]
+      IpAddresses:
+        - SubnetId: !ImportValue fcj-s3vpce-CloudSubnet1
+        - SubnetId: !ImportValue fcj-s3vpce-CloudSubnet2
+  OutboundResolver:
+    Type: AWS::Route53Resolver::ResolverEndpoint
+    Properties:
+      Name: fcj-outbound-onprem
+      Direction: OUTBOUND
+      SecurityGroupIds: [!ImportValue fcj-s3vpce-OnpremSG]
+      IpAddresses:
+        - SubnetId: !ImportValue fcj-s3vpce-OnpremSubnet1
+        - SubnetId: !ImportValue fcj-s3vpce-OnpremSubnet2
+Outputs:
+  PrivateHostedZoneId: {Value: !Ref S3PrivateZone}
+  InboundResolverId: {Value: !Ref InboundResolver}
+  OutboundResolverId: {Value: !Ref OutboundResolver}

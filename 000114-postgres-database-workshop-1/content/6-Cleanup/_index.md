@@ -97,7 +97,7 @@ Make sure that both EC2 instances show **Terminated** first. A security group th
 
     ![Confirm security group deletion](/images/6-cleanup/8.png)
 
-3. Repeat the same steps for `app-sg`, then for `bastion-sg`. Each deletion removes the reference that blocked the next security group.
+3. Repeat the same steps for `app-sg`, then for `bastion-sg`. Each deletion removes the reference that blocked the next security group. When you delete only one security group, the dialog box does not ask you to enter `delete`; just choose **Delete**.
 
 {{% notice note %}}
 This is the same rule you used in chapter 2: a security group can use another security group as the source of an inbound rule. Delete the security groups in the reverse order of the references: `rds-sg` → `app-sg` → `bastion-sg`.

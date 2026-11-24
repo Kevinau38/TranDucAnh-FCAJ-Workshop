@@ -97,7 +97,7 @@ Kiểm tra trước là cả hai EC2 instance đã ở trạng thái **Terminate
 
     ![Confirm security group deletion](/images/6-cleanup/8.png)
 
-3. Lặp lại các bước trên cho `app-sg`, sau đó cho `bastion-sg`. Mỗi lần xóa sẽ gỡ bỏ tham chiếu đang chặn security group kế tiếp.
+3. Lặp lại các bước trên cho `app-sg`, sau đó cho `bastion-sg`. Mỗi lần xóa sẽ gỡ bỏ tham chiếu đang chặn security group kế tiếp. Khi chỉ xóa một security group, hộp thoại không yêu cầu nhập `delete`; bạn chỉ cần chọn **Delete**.
 
 {{% notice note %}}
 Đây chính là cơ chế bạn đã dùng ở chương 2: security group có thể lấy một security group khác làm nguồn (source) của inbound rule. Vì vậy cần xóa theo thứ tự ngược với chiều tham chiếu: `rds-sg` → `app-sg` → `bastion-sg`.

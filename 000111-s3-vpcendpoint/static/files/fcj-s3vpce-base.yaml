@@ -1,0 +1,201 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: FCJ Workshop 000111 - Private access to Amazon S3 with VPC endpoints (base network)
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  InstanceType:
+    Type: String
+    Default: t3.micro
+  PermissionsBoundaryArn:
+    Type: String
+    Default: ''
+    Description: Optional IAM permissions boundary ARN for the EC2 role (leave empty if not required)
+Conditions:
+  HasBoundary: !Not [!Equals [!Ref PermissionsBoundaryArn, '']]
+Resources:
+  VpcCloud:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.10.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags: [{Key: Name, Value: VPC Cloud}]
+  CloudSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcCloud
+      CidrBlock: 10.10.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags: [{Key: Name, Value: Cloud Private Subnet 1}]
+  CloudSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcCloud
+      CidrBlock: 10.10.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags: [{Key: Name, Value: Cloud Private Subnet 2}]
+  CloudRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcCloud
+      Tags: [{Key: Name, Value: RT Private Cloud}]
+  CloudRTA1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref CloudSubnet1, RouteTableId: !Ref CloudRT}
+  CloudRTA2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref CloudSubnet2, RouteTableId: !Ref CloudRT}
+  VpcOnprem:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.16.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags: [{Key: Name, Value: VPC On-prem}]
+  OnpremIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: [{Key: Name, Value: IGW On-prem}]
+  OnpremIGWAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: {VpcId: !Ref VpcOnprem, InternetGatewayId: !Ref OnpremIGW}
+  OnpremSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcOnprem
+      CidrBlock: 172.16.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags: [{Key: Name, Value: On-prem Subnet 1}]
+  OnpremSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcOnprem
+      CidrBlock: 172.16.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags: [{Key: Name, Value: On-prem Subnet 2}]
+  OnpremRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcOnprem
+      Tags: [{Key: Name, Value: RT On-prem}]
+  OnpremDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: OnpremIGWAttach
+    Properties: {RouteTableId: !Ref OnpremRT, DestinationCidrBlock: 0.0.0.0/0, GatewayId: !Ref OnpremIGW}
+  OnpremRTA1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref OnpremSubnet1, RouteTableId: !Ref OnpremRT}
+  OnpremRTA2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref OnpremSubnet2, RouteTableId: !Ref OnpremRT}
+  Peering:
+    Type: AWS::EC2::VPCPeeringConnection
+    Properties:
+      VpcId: !Ref VpcOnprem
+      PeerVpcId: !Ref VpcCloud
+      Tags: [{Key: Name, Value: Hybrid link On-prem to Cloud}]
+  CloudToOnpremRoute:
+    Type: AWS::EC2::Route
+    Properties: {RouteTableId: !Ref CloudRT, DestinationCidrBlock: 172.16.0.0/16, VpcPeeringConnectionId: !Ref Peering}
+  SgCloudEndpoints:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: fcj-s3vpce-endpoints-sg
+      GroupDescription: HTTPS and DNS from VPC Cloud and VPC On-prem
+      VpcId: !Ref VpcCloud
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 10.10.0.0/16}
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 172.16.0.0/16}
+        - {IpProtocol: udp, FromPort: 53, ToPort: 53, CidrIp: 172.16.0.0/16}
+        - {IpProtocol: tcp, FromPort: 53, ToPort: 53, CidrIp: 172.16.0.0/16}
+      Tags: [{Key: Name, Value: fcj-s3vpce-endpoints-sg}]
+  SgCloudInstance:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: fcj-s3vpce-cloud-ec2-sg
+      GroupDescription: Test instance in VPC Cloud (outbound only)
+      VpcId: !Ref VpcCloud
+  SgOnprem:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: fcj-s3vpce-onprem-sg
+      GroupDescription: Test instance and resolver in VPC On-prem (outbound only)
+      VpcId: !Ref VpcOnprem
+  SsmEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcCloud
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssm
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref CloudSubnet1]
+      SecurityGroupIds: [!Ref SgCloudEndpoints]
+  SsmMessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcCloud
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ssmmessages
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref CloudSubnet1]
+      SecurityGroupIds: [!Ref SgCloudEndpoints]
+  Ec2MessagesEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VpcCloud
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2messages
+      VpcEndpointType: Interface
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref CloudSubnet1]
+      SecurityGroupIds: [!Ref SgCloudEndpoints]
+  Ec2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub FCJ-S3VPCE-EC2-Role-${AWS::Region}
+      PermissionsBoundary: !If [HasBoundary, !Ref PermissionsBoundaryArn, !Ref 'AWS::NoValue']
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+  Ec2Profile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub FCJ-S3VPCE-EC2-Profile-${AWS::Region}
+      Roles: [!Ref Ec2Role]
+  CloudInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: [SsmEndpoint, SsmMessagesEndpoint, Ec2MessagesEndpoint]
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref CloudSubnet1
+      SecurityGroupIds: [!Ref SgCloudInstance]
+      IamInstanceProfile: !Ref Ec2Profile
+      Tags: [{Key: Name, Value: Test-Gateway-Endpoint}]
+  OnpremInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: OnpremDefaultRoute
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref OnpremSubnet1
+      SecurityGroupIds: [!Ref SgOnprem]
+      IamInstanceProfile: !Ref Ec2Profile
+      Tags: [{Key: Name, Value: Test-Interface-Endpoint}]
+Outputs:
+  VpcCloudId: {Value: !Ref VpcCloud, Export: {Name: fcj-s3vpce-VpcCloud}}
+  VpcOnpremId: {Value: !Ref VpcOnprem, Export: {Name: fcj-s3vpce-VpcOnprem}}
+  CloudSubnet1: {Value: !Ref CloudSubnet1, Export: {Name: fcj-s3vpce-CloudSubnet1}}
+  CloudSubnet2: {Value: !Ref CloudSubnet2, Export: {Name: fcj-s3vpce-CloudSubnet2}}
+  OnpremSubnet1: {Value: !Ref OnpremSubnet1, Export: {Name: fcj-s3vpce-OnpremSubnet1}}
+  OnpremSubnet2: {Value: !Ref OnpremSubnet2, Export: {Name: fcj-s3vpce-OnpremSubnet2}}
+  EndpointSG: {Value: !Ref SgCloudEndpoints, Export: {Name: fcj-s3vpce-EndpointSG}}
+  OnpremSG: {Value: !Ref SgOnprem, Export: {Name: fcj-s3vpce-OnpremSG}}

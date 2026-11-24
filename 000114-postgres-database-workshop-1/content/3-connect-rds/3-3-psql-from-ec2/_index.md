@@ -107,7 +107,7 @@ To verify the server certificate of RDS (`sslmode=verify-full`), `psql` needs th
 
 | Field | Value | Meaning |
 |---|---|---|
-| Host Address | `10.0.130.72` | The endpoint resolves to a private IP address inside the VPC |
+| Host Address | `10.0.152.9` | The endpoint resolves to a private IP address inside the VPC |
 | SSL Connection | `true` | The connection is encrypted, and the server certificate is verified |
 | Superuser | `off` | The master user is not a PostgreSQL superuser. On Amazon RDS, it has the `rds_superuser` role, and AWS keeps the real superuser to manage the instance |
 

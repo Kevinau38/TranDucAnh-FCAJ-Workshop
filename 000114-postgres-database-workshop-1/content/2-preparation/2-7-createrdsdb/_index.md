@@ -13,7 +13,7 @@ In this step, you create `rdspg-lab-db`, an Amazon RDS for PostgreSQL DB instanc
 |---|---|---|
 | Creation method | Full configuration | You choose the VPC, DB subnet group, and security group yourself |
 | Engine version | PostgreSQL 18.6-R1 | The latest version available when this workshop was updated |
-| Template | Sandbox | Limits the options to low-cost settings for learning |
+| Template | Free tier | Limits the options to low-cost, Free Tier eligible settings |
 | Deployment | Single-AZ DB instance | A standby instance is not needed for this workshop |
 | Instance class | `db.t4g.micro` | Free plan eligible, Graviton-based |
 | Storage | gp3, 20 GiB, autoscaling off | The minimum size, enough for this workshop |
@@ -35,12 +35,12 @@ In this step, you create `rdspg-lab-db`, an Amazon RDS for PostgreSQL DB instanc
 2. Choose the engine and template:
     - (1) **Engine type**: **PostgreSQL**
     - (2) **Database creation method**: **Full configuration**
-    - (3) **Templates**: **Sandbox**
+    - (3) **Templates**: **Free tier**
 
     ![Engine and template](/images/2-preparation/2.7/2.png)
 
 {{% notice warning %}}
-The default template is **Production**, which selects Multi-AZ and larger resources. Make sure you choose **Sandbox**.
+The default template is **Production**, which selects Multi-AZ and larger resources. Make sure you choose **Free tier**.
 {{% /notice %}}
 
 3. In **Availability and durability**:
@@ -49,7 +49,7 @@ The default template is **Production**, which selects Multi-AZ and larger resour
     ![Availability and durability](/images/2-preparation/2.7/3.png)
 
 {{% notice info %}}
-With the Sandbox template, the Multi-AZ options are disabled. A **Multi-AZ DB instance** has one primary and one standby that cannot serve reads. A **Multi-AZ DB cluster** has one primary and two readable standbys. A **Single-AZ** instance has no standby and no data redundancy, which is acceptable for a lab but not for production.
+With the Free tier template, the Multi-AZ options are disabled. A **Multi-AZ DB instance** has one primary and one standby that cannot serve reads. A **Multi-AZ DB cluster** has one primary and two readable standbys. A **Single-AZ** instance has no standby and no data redundancy, which is acceptable for a lab but not for production.
 {{% /notice %}}
 
 #### Configure the settings and credentials

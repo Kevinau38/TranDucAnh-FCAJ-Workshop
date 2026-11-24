@@ -30,12 +30,12 @@ defaultContentLanguageInSubdir= true
 [Languages.en]
 title = "Documentation for Hugo Learn Theme"
 weight = 1
-languageName = "English"
+label = "English"
 
 [Languages.fr]
 title = "Documentation du thème Hugo Learn"
 weight = 2
-languageName = "Français"
+label = "Français"
 ```
 
 Puis, pour chaque nouvelle page, ajoutez *l'id* de la langue du fichier.

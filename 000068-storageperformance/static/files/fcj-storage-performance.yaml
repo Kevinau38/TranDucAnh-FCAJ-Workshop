@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: FCJ Workshop 000068 - Storage Performance lab (EC2 with EBS sample data, Amazon EFS, Amazon S3, access through Session Manager)
+
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+    Description: Amazon Linux 2023 (arm64) AMI, resolved from the public SSM parameter
+  InstanceType:
+    Type: String
+    Default: c7g.large
+    AllowedValues: [c7g.large, m7g.large, t4g.medium]
+    Description: Graviton instance type for the performance tests
+  PermissionsBoundaryArn:
+    Type: String
+    Default: ''
+    Description: Optional IAM permissions boundary ARN for the EC2 role (leave empty if your account does not require one)
+
+Conditions:
+  HasBoundary: !Not [!Equals [!Ref PermissionsBoundaryArn, '']]
+
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.40.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-VPC}]
+  Igw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-IGW}]
+  IgwAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: {VpcId: !Ref Vpc, InternetGatewayId: !Ref Igw}
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.40.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-Public-Subnet}]
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-RT}]
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IgwAttach
+    Properties: {RouteTableId: !Ref RouteTable, DestinationCidrBlock: 0.0.0.0/0, GatewayId: !Ref Igw}
+  SubnetRta:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref Subnet, RouteTableId: !Ref RouteTable}
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref Vpc
+      ServiceName: !Sub com.amazonaws.${AWS::Region}.s3
+      VpcEndpointType: Gateway
+      RouteTableIds: [!Ref RouteTable]
+
+  InstanceSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: FCJ-StoragePerf-Instance-SG
+      GroupDescription: Storage performance instance - no inbound rules, access through Session Manager
+      VpcId: !Ref Vpc
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-Instance-SG}]
+  EfsSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: FCJ-StoragePerf-EFS-SG
+      GroupDescription: EFS mount target - NFS from the lab instance only
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 2049, ToPort: 2049, SourceSecurityGroupId: !Ref InstanceSg}
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-EFS-SG}]
+
+  LabBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-Bucket}]
+
+  FileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      PerformanceMode: generalPurpose
+      ThroughputMode: bursting
+      Encrypted: true
+      FileSystemTags: [{Key: Name, Value: FCJ-StoragePerf-EFS}]
+  MountTarget:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref FileSystem
+      SubnetId: !Ref Subnet
+      SecurityGroups: [!Ref EfsSg]
+
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub FCJ-StoragePerf-EC2-Role-${AWS::Region}
+      PermissionsBoundary: !If [HasBoundary, !Ref PermissionsBoundaryArn, !Ref 'AWS::NoValue']
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: LabBucketAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [s3:ListBucket, s3:GetBucketLocation, s3:ListBucketMultipartUploads]
+                Resource: !GetAtt LabBucket.Arn
+              - Effect: Allow
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject, s3:GetObjectTagging, s3:PutObjectTagging, s3:AbortMultipartUpload, s3:ListMultipartUploadParts]
+                Resource: !Sub ${LabBucket.Arn}/*
+  Profile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub FCJ-StoragePerf-EC2-Profile-${AWS::Region}
+      Roles: [!Ref Role]
+
+  Instance:
+    Type: AWS::EC2::Instance
+    DependsOn: [DefaultRoute, MountTarget]
+    CreationPolicy:
+      ResourceSignal: {Timeout: PT25M}
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref Subnet
+      SecurityGroupIds: [!Ref InstanceSg]
+      IamInstanceProfile: !Ref Profile
+      MetadataOptions: {HttpTokens: required}
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs: {VolumeSize: 30, VolumeType: gp3, DeleteOnTermination: true}
+        - DeviceName: /dev/sdf
+          Ebs: {VolumeSize: 20, VolumeType: gp3, DeleteOnTermination: true}
+      Tags: [{Key: Name, Value: FCJ-StoragePerf-Instance}]
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          exec > /var/log/fcj-setup.log 2>&1
+          set -x
+          dnf install -y parallel amazon-efs-utils rsync gcc make autoconf automake aws-cfn-bootstrap
+          # fpart / fpsync (parallel file transfer tool) built from source
+          cd /tmp
+          curl -sSL -o fpart.tar.gz https://github.com/martymac/fpart/archive/refs/tags/fpart-1.7.1.tar.gz
+          tar xzf fpart.tar.gz && cd fpart-fpart-1.7.1 && autoreconf -i && ./configure && make && make install
+          # EBS data volume with 2,000 x 1 MB sample files
+          DEV=$(lsblk -dpno NAME,SERIAL | awk '$2 ~ /^vol/ {print $1}' | while read d; do [ -z "$(lsblk -no MOUNTPOINT $d | tr -d '[:space:]')" ] && [ -z "$(lsblk -no PARTTYPE $d | tr -d '[:space:]')" ] && echo $d; done | head -1)
+          mkfs -t xfs $DEV
+          mkdir -p /ebs
+          echo "$DEV /ebs xfs defaults,nofail 0 2" >> /etc/fstab
+          mount /ebs
+          mkdir -p /ebs/tutorial/data-1m
+          for i in $(seq 1 2000); do head -c 1048576 /dev/urandom > /ebs/tutorial/data-1m/file-$i.bin; done
+          chmod -R a+rX /ebs/tutorial
+          # Amazon EFS file system
+          mkdir -p /efs
+          echo "${FileSystem}:/ /efs efs _netdev,tls,nofail 0 0" >> /etc/fstab
+          for t in $(seq 1 30); do mount /efs && break; sleep 10; done
+          mkdir -p /efs/tutorial/{touch,dd,rsync,cp,fpsync,parallelcp}
+          chmod -R 777 /efs/tutorial
+          # Environment for every shell (Session Manager user included)
+          cat > /etc/profile.d/fcj-lab.sh <<EOF
+          export bucket=${LabBucket}
+          export AWS_DEFAULT_REGION=${AWS::Region}
+          EOF
+          /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
+
+Outputs:
+  InstanceId:
+    Value: !Ref Instance
+  BucketName:
+    Value: !Ref LabBucket
+  FileSystemId:
+    Value: !Ref FileSystem

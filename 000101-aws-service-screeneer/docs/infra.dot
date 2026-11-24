@@ -1,0 +1,8 @@
+digraph INFRA {
+  node [ color = "black", fillcolor = "#E6E6E6", height =1, style = "filled,bold,rounded", fontname = "Arial" ];
+  "Hugo Website" [ label = "Hugo Website
+(Static Site)", shape =rectangle, fillcolor = "#E78F81" ];
+  "Netlify Deployment" [ label = "Netlify Deployment
+(Netlify)", shape =rectangle, fillcolor = "#E78F81" ];
+  "Netlify Deployment" -> "Hugo Website";
+}

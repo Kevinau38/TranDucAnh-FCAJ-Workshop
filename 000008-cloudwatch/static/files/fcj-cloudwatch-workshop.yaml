@@ -1,0 +1,216 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: FCJ Workshop 000008 - Amazon CloudWatch lab environment (3 EC2 instances with the CloudWatch agent and sample workloads)
+Parameters:
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64
+    Description: Amazon Linux 2023 (arm64) AMI, resolved from the public SSM parameter
+  InstanceType:
+    Type: String
+    Default: t4g.micro
+    AllowedValues: [t4g.nano, t4g.micro, t4g.small]
+  PermissionsBoundaryArn:
+    Type: String
+    Default: ''
+    Description: Optional IAM permissions boundary ARN for the EC2 role (leave empty if your account does not require one)
+Conditions:
+  HasBoundary: !Not [!Equals [!Ref PermissionsBoundaryArn, '']]
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.30.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-VPC}]
+  Igw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-IGW}]
+  IgwAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: {VpcId: !Ref Vpc, InternetGatewayId: !Ref Igw}
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.30.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-Public-Subnet}]
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-RT}]
+  DefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IgwAttach
+    Properties: {RouteTableId: !Ref RouteTable, DestinationCidrBlock: 0.0.0.0/0, GatewayId: !Ref Igw}
+  SubnetRta:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: {SubnetId: !Ref Subnet, RouteTableId: !Ref RouteTable}
+  InstanceSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: FCJ-CloudWatch-Instance-SG
+      GroupDescription: CloudWatch lab instances - no inbound rules, access through Session Manager
+      VpcId: !Ref Vpc
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-Instance-SG}]
+  MessagesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /fcj/cloudwatch-workshop/var/log/messages
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub FCJ-CloudWatch-EC2-Role-${AWS::Region}
+      PermissionsBoundary: !If [HasBoundary, !Ref PermissionsBoundaryArn, !Ref 'AWS::NoValue']
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+  Profile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub FCJ-CloudWatch-EC2-Profile-${AWS::Region}
+      Roles: [!Ref Role]
+  InstanceA:
+    Type: AWS::EC2::Instance
+    DependsOn: DefaultRoute
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref Subnet
+      SecurityGroupIds: [!Ref InstanceSg]
+      IamInstanceProfile: !Ref Profile
+      MetadataOptions: {HttpTokens: required}
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-Instance-A}]
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            PROFILE=${P}
+            LOGGROUP=${MessagesLogGroup}
+            ${Setup}
+          - P: A
+            Setup: !FindInMap [Scripts, Setup, Body]
+  InstanceB:
+    Type: AWS::EC2::Instance
+    DependsOn: DefaultRoute
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref Subnet
+      SecurityGroupIds: [!Ref InstanceSg]
+      IamInstanceProfile: !Ref Profile
+      MetadataOptions: {HttpTokens: required}
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-Instance-B}]
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            PROFILE=${P}
+            LOGGROUP=${MessagesLogGroup}
+            ${Setup}
+          - P: B
+            Setup: !FindInMap [Scripts, Setup, Body]
+  InstanceC:
+    Type: AWS::EC2::Instance
+    DependsOn: DefaultRoute
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId: !Ref Subnet
+      SecurityGroupIds: [!Ref InstanceSg]
+      IamInstanceProfile: !Ref Profile
+      MetadataOptions: {HttpTokens: required}
+      Tags: [{Key: Name, Value: FCJ-CloudWatch-Instance-C}]
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            PROFILE=${P}
+            LOGGROUP=${MessagesLogGroup}
+            ${Setup}
+          - P: C
+            Setup: !FindInMap [Scripts, Setup, Body]
+Mappings:
+  Scripts:
+    Setup:
+      Body: |
+        dnf install -y amazon-cloudwatch-agent rsyslog python3
+        systemctl enable --now rsyslog
+        mkdir -p /opt/fcj
+        # CloudWatch agent configuration
+        cat > /opt/fcj/cwagent.json <<CFG
+        {
+          "agent": {"metrics_collection_interval": 60},
+          "logs": {"logs_collected": {"files": {"collect_list": [
+            {"file_path": "/var/log/messages", "log_group_name": "$LOGGROUP", "log_stream_name": "{instance_id}"}
+          ]}}},
+          "metrics": {
+            "namespace": "CWAgent",
+            "append_dimensions": {"ImageId": "\${aws:ImageId}", "InstanceId": "\${aws:InstanceId}", "InstanceType": "\${aws:InstanceType}"},
+            "metrics_collected": {
+              "disk": {"measurement": ["used_percent"], "resources": ["/"]},
+              "mem": {"measurement": ["mem_used_percent"]},
+              "procstat": [{"exe": "cloudwatch", "measurement": ["cpu_usage", "memory_rss", "memory_swap"]}]
+            }
+          }
+        }
+        CFG
+        /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/fcj/cwagent.json
+        # Sample workload: CPU and disk activity in repeating cycles (different per instance)
+        cat > /opt/fcj/workload.sh <<'WL'
+        #!/bin/bash
+        P=$(cat /opt/fcj/profile)
+        case $P in A) BUSY=240; IDLE=660; MB=400;; B) BUSY=120; IDLE=480; MB=200;; *) BUSY=45; IDLE=555; MB=50;; esac
+        while true; do
+          timeout $BUSY sh -c 'while :; do :; done'
+          dd if=/dev/zero of=/var/tmp/fcj.bin bs=1M count=$MB oflag=direct status=none; rm -f /var/tmp/fcj.bin
+          sleep $IDLE
+        done
+        WL
+        echo "$PROFILE" > /opt/fcj/profile
+        # Sample application that writes INFO / WARNING / ERROR lines to syslog (/var/log/messages)
+        cat > /opt/fcj/logger.py <<'PY'
+        #!/usr/bin/env python3
+        import random, syslog, time
+        syslog.openlog('python-app', 0, syslog.LOG_USER)
+        actions = ['GET /api/orders', 'POST /api/orders', 'GET /api/products', 'PUT /api/cart', 'GET /health']
+        while True:
+            r = random.random()
+            a = random.choice(actions)
+            if r < 0.15:
+                syslog.syslog(syslog.LOG_ERR, f'ERROR {a} failed: database timeout after {random.randint(3, 9)}s')
+            elif r < 0.35:
+                syslog.syslog(syslog.LOG_WARNING, f'WARNING {a} slow response {random.randint(800, 2500)}ms')
+            else:
+                syslog.syslog(syslog.LOG_INFO, f'INFO {a} 200 {random.randint(20, 300)}ms')
+            time.sleep(random.uniform(1, 4))
+        PY
+        chmod +x /opt/fcj/workload.sh /opt/fcj/logger.py
+        cat > /etc/systemd/system/fcj-workload.service <<'SVC'
+        [Unit]
+        Description=FCJ CloudWatch workshop sample workload
+        After=network-online.target
+        [Service]
+        ExecStart=/opt/fcj/workload.sh
+        Restart=always
+        Nice=10
+        [Install]
+        WantedBy=multi-user.target
+        SVC
+        systemctl daemon-reload
+        systemctl enable --now fcj-workload.service
+Outputs:
+  InstanceA: {Value: !Ref InstanceA}
+  InstanceB: {Value: !Ref InstanceB}
+  InstanceC: {Value: !Ref InstanceC}
+  LogGroup: {Value: !Ref MessagesLogGroup}
