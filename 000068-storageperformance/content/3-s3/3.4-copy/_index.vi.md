@@ -19,7 +19,7 @@ pre : " <b> 3.4 </b> "
 
    - (1) Tải về instance rồi upload lại: khoảng 1 phút 20 giây. Có 10 GB dữ liệu đi giữa instance và S3.
    - (2) `aws s3api copy-object`: khoảng 1 phút 17 giây. Việc copy diễn ra trong S3, nhưng chỉ bằng một request duy nhất.
-   - (3) `aws s3 cp` từ S3 sang S3: khoảng 12 giây. AWS CLI chia việc copy thành nhiều phần và copy tới 10 phần cùng lúc bằng `UploadPartCopy`.
+   - (3) `aws s3 cp` từ S3 sang S3: khoảng 10 giây. AWS CLI chia việc copy thành nhiều phần và copy tới 10 phần cùng lúc bằng `UploadPartCopy`.
 
    ![Ba cách copy một object 5 GB](/images/3-s3/3.4-copy.png)
 2. Mở [Amazon S3 console](https://console.aws.amazon.com/s3/) và chọn bucket của bài lab. (1) Các prefix `copy/`, `parallel/`, `run1/` tới `run3/`, `sync1/` và `sync2/` chứa các object bạn đã upload trong phần này, bên cạnh bốn object `upload*.test`.

@@ -19,7 +19,7 @@ To copy an object to another location in S3, you do not need to download it firs
 
    - (1) Download to the instance, then upload again: about 1 minute 20 seconds. 10 GB travel between the instance and S3.
    - (2) `aws s3api copy-object`: about 1 minute 17 seconds. The copy happens inside S3, but in one single request.
-   - (3) `aws s3 cp` from S3 to S3: about 12 seconds. The AWS CLI splits the copy into parts and copies up to 10 parts at the same time with `UploadPartCopy`.
+   - (3) `aws s3 cp` from S3 to S3: about 10 seconds. The AWS CLI splits the copy into parts and copies up to 10 parts at the same time with `UploadPartCopy`.
 
    ![Three ways to copy a 5 GB object](/images/3-s3/3.4-copy.png)
 2. Open the [Amazon S3 console](https://console.aws.amazon.com/s3/) and select the lab bucket. (1) The prefixes `copy/`, `parallel/`, `run1/` to `run3/`, `sync1/` and `sync2/` hold the objects you uploaded in this part, next to the four `upload*.test` objects.

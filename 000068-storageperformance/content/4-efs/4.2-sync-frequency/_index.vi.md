@@ -22,7 +22,7 @@ Trong bước này, bạn ghi một file 2 GB lên EFS bốn lần, thay đổi 
 
    - (1) Block 1 MB, sync một lần: khoảng 19 giây, 113 MB/s.
    - (2) Block 16 MB, sync một lần: khoảng 19 giây, 112 MB/s.
-   - (3) Block 1 MB, sync sau mỗi block: khoảng 55 giây, 39 MB/s.
+   - (3) Block 1 MB, sync sau mỗi block: khoảng 54 giây, 40 MB/s.
    - (4) Block 16 MB, sync sau mỗi block: khoảng 19 giây, 115 MB/s.
 
    ![dd với các kích thước block và cách sync khác nhau](/images/4-efs/4.2-sync-frequency.png)

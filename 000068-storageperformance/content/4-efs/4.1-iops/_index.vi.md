@@ -16,8 +16,8 @@ Trong bước này, bạn tạo 1.024 file rỗng trên EFS theo ba cách khác 
    directory=$(echo $(uuidgen)| grep -o ".\{6\}$"); mkdir -p /efs/tutorial/touch/${directory}/{1..32}; time seq 1 32 | parallel --will-cite -j 32 touch /efs/tutorial/touch/${directory}/{}/test1.5{1..32}
    ```
 
-   - (1) Mỗi lần một lệnh `touch`, trong một thư mục: khoảng 11 giây.
-   - (2) 128 lệnh `touch` cùng lúc, trong một thư mục: khoảng 6 giây.
+   - (1) Mỗi lần một lệnh `touch`, trong một thư mục: khoảng 9 giây.
+   - (2) 128 lệnh `touch` cùng lúc, trong một thư mục: khoảng 5 giây.
    - (3) 32 job, mỗi job tạo 32 file trong thư mục riêng: dưới 1 giây.
 
    ![Tạo 1.024 file theo ba cách](/images/4-efs/4.1-touch.png)

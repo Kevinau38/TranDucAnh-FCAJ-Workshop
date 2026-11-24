@@ -15,8 +15,8 @@ pre : " <b> 3.2 </b> "
    aws configure set default.s3.max_concurrent_requests 10 && time aws s3 sync /ebs/tutorial/data-1m/ s3://${bucket}/sync2/ --only-show-errors
    ```
 
-   - (1) With 1 request, the sync takes about 1 minute 40 seconds.
-   - (2) With 10 requests, it takes about 16 seconds.
+   - (1) With 1 request, the sync takes about 1 minute 45 seconds.
+   - (2) With 10 requests, it takes about 15 seconds.
 
    ![aws s3 sync with 1 and 10 threads](/images/3-s3/3.2-sync.png)
 

@@ -16,8 +16,8 @@ In this step you create 1,024 empty files on EFS in three different ways. Creati
    directory=$(echo $(uuidgen)| grep -o ".\{6\}$"); mkdir -p /efs/tutorial/touch/${directory}/{1..32}; time seq 1 32 | parallel --will-cite -j 32 touch /efs/tutorial/touch/${directory}/{}/test1.5{1..32}
    ```
 
-   - (1) One `touch` at a time, in one directory: about 11 seconds.
-   - (2) 128 `touch` commands at the same time, in one directory: about 6 seconds.
+   - (1) One `touch` at a time, in one directory: about 9 seconds.
+   - (2) 128 `touch` commands at the same time, in one directory: about 5 seconds.
    - (3) 32 jobs, each creating 32 files in its own directory: under 1 second.
 
    ![Create 1,024 files in three ways](/images/4-efs/4.1-touch.png)

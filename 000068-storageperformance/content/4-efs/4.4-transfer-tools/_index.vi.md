@@ -34,10 +34,10 @@ Trong bước này, bạn copy 2.000 file mẫu (2 GB) từ ổ EBS sang EFS b�
    sudo sh -c 'sync && echo 3 > /proc/sys/vm/drop_caches' && time find /ebs/tutorial/data-1m/. -type f | parallel --will-cite -j ${threads} cp {} /efs/tutorial/parallelcp
    ```
 
-   - (1) `rsync`: khoảng 1 phút 50 giây.
-   - (2) `cp`: khoảng 1 phút 19 giây.
-   - (3) `fpsync` với cấu hình mặc định: khoảng 1 phút 57 giây, không nhanh hơn `rsync`.
-   - (4) `fpsync -f 250`: khoảng 25 giây.
+   - (1) `rsync`: khoảng 1 phút 31 giây.
+   - (2) `cp`: khoảng 1 phút 9 giây.
+   - (3) `fpsync` với cấu hình mặc định: khoảng 1 phút 38 giây, không nhanh hơn `rsync`.
+   - (4) `fpsync -f 250`: khoảng 20 giây.
    - (5) `cp` với GNU `parallel`: khoảng 19 giây.
 
    ![rsync, cp, fpsync và parallel cp](/images/4-efs/4.4-transfer-tools.png)

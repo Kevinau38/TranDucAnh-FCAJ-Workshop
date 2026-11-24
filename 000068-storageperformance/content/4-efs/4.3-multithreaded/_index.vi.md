@@ -6,7 +6,7 @@ pre : " <b> 4.3 </b> "
 ---
 
 
-Bước 4.2 cho thấy ghi block 1 MB và sync sau mỗi block rất chậm (khoảng 55 giây cho 2 GB). Trong bước này, bạn ghi cùng 2 GB đó, với cùng cấu hình, nhưng chia ra nhiều luồng.
+Bước 4.2 cho thấy ghi block 1 MB và sync sau mỗi block rất chậm (khoảng 54 giây cho 2 GB). Trong bước này, bạn ghi cùng 2 GB đó, với cùng cấu hình, nhưng chia ra nhiều luồng.
 
 1. Ghi 2 GB với 4 luồng (4 × 512 MB), rồi với 16 luồng (16 × 128 MB):
 

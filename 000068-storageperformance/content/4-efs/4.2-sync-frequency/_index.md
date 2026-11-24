@@ -22,7 +22,7 @@ In this step you write a 2 GB file to EFS four times, changing the block size (`
 
    - (1) 1 MB blocks, sync once: about 19 seconds, 113 MB/s.
    - (2) 16 MB blocks, sync once: about 19 seconds, 112 MB/s.
-   - (3) 1 MB blocks, sync after every block: about 55 seconds, 39 MB/s.
+   - (3) 1 MB blocks, sync after every block: about 54 seconds, 40 MB/s.
    - (4) 16 MB blocks, sync after every block: about 19 seconds, 115 MB/s.
 
    ![dd with different block sizes and sync settings](/images/4-efs/4.2-sync-frequency.png)

@@ -23,8 +23,8 @@ Với object nhỏ, thời gian chủ yếu tốn cho request chứ không phả
    aws configure set default.s3.max_concurrent_requests 50 && time aws s3 cp small/ s3://${bucket}/run3/ --recursive --only-show-errors
    ```
 
-   - (1) Với 1 request: khoảng 18 giây, tức khoảng 28 object mỗi giây.
-   - (2) Với 10 request: khoảng 2,3 giây, tức khoảng 220 object mỗi giây.
+   - (1) Với 1 request: khoảng 17 giây, tức khoảng 30 object mỗi giây.
+   - (2) Với 10 request: khoảng 2,1 giây, tức khoảng 235 object mỗi giây.
    - (3) Với 50 request: không nhanh hơn 10 request.
 
    ![Upload 500 file nhỏ với 1, 10 và 50 luồng](/images/3-s3/3.3-small-files.png)

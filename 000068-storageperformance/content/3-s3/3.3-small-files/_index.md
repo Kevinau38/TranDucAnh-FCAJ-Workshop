@@ -23,8 +23,8 @@ For small objects, the time is spent on requests, not on data. The way to move m
    aws configure set default.s3.max_concurrent_requests 50 && time aws s3 cp small/ s3://${bucket}/run3/ --recursive --only-show-errors
    ```
 
-   - (1) With 1 request: about 18 seconds, around 28 objects per second.
-   - (2) With 10 requests: about 2.3 seconds, around 220 objects per second.
+   - (1) With 1 request: about 17 seconds, around 30 objects per second.
+   - (2) With 10 requests: about 2.1 seconds, around 235 objects per second.
    - (3) With 50 requests: no faster than with 10.
 
    ![Upload 500 small files with 1, 10 and 50 threads](/images/3-s3/3.3-small-files.png)

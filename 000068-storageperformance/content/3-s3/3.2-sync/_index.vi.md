@@ -15,8 +15,8 @@ Lệnh `aws s3 sync` copy các file còn thiếu hoặc đã thay đổi giữa 
    aws configure set default.s3.max_concurrent_requests 10 && time aws s3 sync /ebs/tutorial/data-1m/ s3://${bucket}/sync2/ --only-show-errors
    ```
 
-   - (1) Với 1 request, lệnh sync mất khoảng 1 phút 40 giây.
-   - (2) Với 10 request, chỉ mất khoảng 16 giây.
+   - (1) Với 1 request, lệnh sync mất khoảng 1 phút 45 giây.
+   - (2) Với 10 request, chỉ mất khoảng 15 giây.
 
    ![aws s3 sync với 1 và 10 luồng](/images/3-s3/3.2-sync.png)
 

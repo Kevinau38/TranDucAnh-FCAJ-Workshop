@@ -6,7 +6,7 @@ pre : " <b> 4.3 </b> "
 ---
 
 
-Step 4.2 showed that writing 1 MB blocks with a sync after every block is slow (about 55 seconds for 2 GB). In this step you write the same 2 GB, with the same settings, but split over several threads.
+Step 4.2 showed that writing 1 MB blocks with a sync after every block is slow (about 54 seconds for 2 GB). In this step you write the same 2 GB, with the same settings, but split over several threads.
 
 1. Write 2 GB with 4 threads (4 × 512 MB), then with 16 threads (16 × 128 MB):
 

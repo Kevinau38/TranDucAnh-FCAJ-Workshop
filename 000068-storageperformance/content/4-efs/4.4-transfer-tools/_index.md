@@ -34,10 +34,10 @@ In this step you copy the 2,000 sample files (2 GB) from the EBS volume to EFS w
    sudo sh -c 'sync && echo 3 > /proc/sys/vm/drop_caches' && time find /ebs/tutorial/data-1m/. -type f | parallel --will-cite -j ${threads} cp {} /efs/tutorial/parallelcp
    ```
 
-   - (1) `rsync`: about 1 minute 50 seconds.
-   - (2) `cp`: about 1 minute 19 seconds.
-   - (3) `fpsync` with default settings: about 1 minute 57 seconds, no better than `rsync`.
-   - (4) `fpsync -f 250`: about 25 seconds.
+   - (1) `rsync`: about 1 minute 31 seconds.
+   - (2) `cp`: about 1 minute 9 seconds.
+   - (3) `fpsync` with default settings: about 1 minute 38 seconds, no better than `rsync`.
+   - (4) `fpsync -f 250`: about 20 seconds.
    - (5) `cp` with GNU `parallel`: about 19 seconds.
 
    ![rsync, cp, fpsync and parallel cp](/images/4-efs/4.4-transfer-tools.png)
