@@ -21,6 +21,7 @@ Workshops of the **AWS Study Group – First Cloud AI Journey (FCAJ)** that I, *
 | 000114 | [AWS RDS PostgreSQL (Postgres Database Workshop 1)](000114-postgres-database-workshop-1/) | Published | https://000114.awsfcaj.com |
 | 000115 | [AWS RDS PostgreSQL Foundation (Postgres Database Workshop 2)](000115-postgres-database-workshop-2/) | Published | https://000115.awsfcaj.com |
 | 000116 | [AWS RDS PostgreSQL for Developers (Postgres Database Workshop 3)](000116-postgres-database-workshop-3/) | Published | https://000116.awsfcaj.com |
+| 000117 | [Build a Complete Serverless Chat Website](000117-build-serverless-chat-website/) | Published | https://000117.awsfcaj.com |
 | 000128 | [Deploy a Hugo Website with GitHub Pages](000128-deploy-website-with-git-pages/) | Published | https://000128.awsfcaj.com |
 | 000142 | [Share Data Across VPCs with EBS Multi-Attach and NVMe Reservations](000142-nvme-reservation-sharedataaccrossvpc/) | Published | https://000142.awsfcaj.com |
 
@@ -111,6 +112,14 @@ What changed in each workshop is listed below.
 - RDS-managed secret in AWS Secrets Manager, read through an IAM role; AWS SDK for JavaScript v3 to find the endpoint and the secret.
 - Express + Handlebars CRUD app, accessed with Session Manager (no SSH).
 
+### 000117 – Build a Complete Serverless Chat Website
+
+- Static site in a private S3 bucket served through CloudFront with Origin Access Control (no public bucket).
+- API Gateway REST API and Node.js Lambda functions (`nodejs26.x`) with `FCJ-*` roles and a permissions boundary; DynamoDB on-demand tables with a GSI.
+- Split the proxy into one function per route with mapping templates and the generated JavaScript SDK.
+- Cognito user pool (SPA client), Cognito authorizer on every method, user name taken from the ID token; CachingOptimized with invalidation.
+- New architecture diagram and a CLI clean-up script.
+
 ### 000128 – Deploy a Hugo Website with GitHub Pages
 
 - User site published from a branch, the Static HTML workflow, and a Hugo workflow for CI/CD.
@@ -157,6 +166,7 @@ Các workshop của **AWS Study Group – First Cloud AI Journey (FCAJ)** do mì
 | 000114 | [AWS RDS PostgreSQL (Postgres Database Workshop 1)](000114-postgres-database-workshop-1/) | Đã xuất bản | https://000114.awsfcaj.com |
 | 000115 | [AWS RDS PostgreSQL Foundation (Postgres Database Workshop 2)](000115-postgres-database-workshop-2/) | Đã xuất bản | https://000115.awsfcaj.com |
 | 000116 | [AWS RDS PostgreSQL for Developers (Postgres Database Workshop 3)](000116-postgres-database-workshop-3/) | Đã xuất bản | https://000116.awsfcaj.com |
+| 000117 | [Build a Complete Serverless Chat Website](000117-build-serverless-chat-website/) | Đã xuất bản | https://000117.awsfcaj.com |
 | 000128 | [Deploy a Hugo Website with GitHub Pages](000128-deploy-website-with-git-pages/) | Đã xuất bản | https://000128.awsfcaj.com |
 | 000142 | [Share Data Across VPCs with EBS Multi-Attach and NVMe Reservations](000142-nvme-reservation-sharedataaccrossvpc/) | Đã xuất bản | https://000142.awsfcaj.com |
 
@@ -185,6 +195,7 @@ Với mỗi workshop, mình:
 - **000114 – AWS RDS PostgreSQL:** VPC public/private subnet ở 2 AZ, S3 gateway endpoint thay NAT gateway; bastion và app server Amazon Linux 2023, RDS for PostgreSQL 18.6 (`db.t4g.micro`, gp3); pgAdmin 4 qua SSH tunnel, `psql` TLS `verify-full` qua SSH ProxyJump; kiến thức PostgreSQL cơ bản; sơ đồ kiến trúc vẽ lại và chương dọn dẹp đúng thứ tự xoá.
 - **000115 – RDS PostgreSQL Foundation:** 3 AZ với private subnet, bastion và SSH ProxyJump, S3 gateway endpoint; nâng cấp PostgreSQL 17 lên 18; giám sát bằng CloudWatch, Performance Insights, `pgbench`; backup tự động, snapshot, PITR, AWS Backup; read replica, Multi-AZ DB cluster, parameter group, thử failover Multi-AZ.
 - **000116 – RDS PostgreSQL for Developers:** ứng dụng Node.js dùng `pg` qua TLS `verify-full`; secret do RDS quản lý trong Secrets Manager, đọc qua IAM role; AWS SDK for JavaScript v3 để lấy endpoint và secret; ứng dụng CRUD Express + Handlebars, truy cập bằng Session Manager (không SSH).
+- **000117 – Serverless Chat Website:** website tĩnh trong bucket S3 private, phát hành qua CloudFront với Origin Access Control; API Gateway REST và Lambda Node.js (`nodejs26.x`) với role `FCJ-*` có permissions boundary; DynamoDB on-demand có GSI; tách proxy thành nhiều function với mapping template và JavaScript SDK sinh từ API; Cognito user pool (SPA), authorizer cho API, tên người dùng lấy từ ID token; bật CachingOptimized và invalidation; sơ đồ kiến trúc mới và script dọn dẹp bằng CLI.
 - **000128 – Hugo với GitHub Pages:** user site publish từ branch, workflow Static HTML và workflow Hugo cho CI/CD; dùng Git Credential Manager thay cho personal access token; Hugo quick start với theme Ananke.
 - **000142 – EBS Multi-Attach và NVMe Reservation:** hai VPC tách biệt (prod và test) với private subnet cùng Availability Zone, không NAT, không peering; Session Manager qua interface endpoint, S3 gateway endpoint cho `dnf`; instance Amazon Linux 2023 chạy PostgreSQL 18, một volume `io2` bật Multi-Attach gắn vào cả hai; chạy thử luồng NVMe reservation bằng `nvme-cli`: đăng ký key, reservation Write Exclusive, lệnh ghi từ instance còn lại bị chặn (Reservation Conflict), restore từ mount chỉ đọc, chuyển quyền ghi; sơ đồ kiến trúc mới và chương dọn dẹp bằng CLI.
 
