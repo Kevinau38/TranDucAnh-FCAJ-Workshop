@@ -22,6 +22,7 @@ Workshops of the **AWS Study Group – First Cloud AI Journey (FCAJ)** that I, *
 | 000115 | [AWS RDS PostgreSQL Foundation (Postgres Database Workshop 2)](000115-postgres-database-workshop-2/) | Published | https://000115.awsfcaj.com |
 | 000116 | [AWS RDS PostgreSQL for Developers (Postgres Database Workshop 3)](000116-postgres-database-workshop-3/) | Published | https://000116.awsfcaj.com |
 | 000128 | [Deploy a Hugo Website with GitHub Pages](000128-deploy-website-with-git-pages/) | Published | https://000128.awsfcaj.com |
+| 000142 | [Share Data Across VPCs with EBS Multi-Attach and NVMe Reservations](000142-nvme-reservation-sharedataaccrossvpc/) | Published | https://000142.awsfcaj.com |
 
 ## What "updated" means
 
@@ -115,6 +116,13 @@ What changed in each workshop is listed below.
 - User site published from a branch, the Static HTML workflow, and a Hugo workflow for CI/CD.
 - Git Credential Manager instead of a personal access token; Hugo quick start with the Ananke theme.
 
+### 000142 – Share Data Across VPCs with EBS Multi-Attach and NVMe Reservations
+
+- Two isolated VPCs (prod and test) with private subnets in the same Availability Zone, no NAT, no peering; Session Manager through interface endpoints, S3 gateway endpoint for `dnf`.
+- Amazon Linux 2023 instances with PostgreSQL 18, one Multi-Attach enabled `io2` volume attached to both.
+- Tested NVMe reservation flow with `nvme-cli`: register keys, Write Exclusive reservation, write blocked on the other instance (Reservation Conflict), read-only restore, hand over write access.
+- New architecture diagram and a CLI clean-up chapter.
+
 ## Build locally
 
 Each workshop is a [Hugo](https://gohugo.io/) site. Go into the workshop folder and run the Hugo server, for example:
@@ -150,6 +158,7 @@ Các workshop của **AWS Study Group – First Cloud AI Journey (FCAJ)** do mì
 | 000115 | [AWS RDS PostgreSQL Foundation (Postgres Database Workshop 2)](000115-postgres-database-workshop-2/) | Đã xuất bản | https://000115.awsfcaj.com |
 | 000116 | [AWS RDS PostgreSQL for Developers (Postgres Database Workshop 3)](000116-postgres-database-workshop-3/) | Đã xuất bản | https://000116.awsfcaj.com |
 | 000128 | [Deploy a Hugo Website with GitHub Pages](000128-deploy-website-with-git-pages/) | Đã xuất bản | https://000128.awsfcaj.com |
+| 000142 | [Share Data Across VPCs with EBS Multi-Attach and NVMe Reservations](000142-nvme-reservation-sharedataaccrossvpc/) | Đã xuất bản | https://000142.awsfcaj.com |
 
 ### "Cập nhật" nghĩa là gì
 
@@ -177,6 +186,7 @@ Với mỗi workshop, mình:
 - **000115 – RDS PostgreSQL Foundation:** 3 AZ với private subnet, bastion và SSH ProxyJump, S3 gateway endpoint; nâng cấp PostgreSQL 17 lên 18; giám sát bằng CloudWatch, Performance Insights, `pgbench`; backup tự động, snapshot, PITR, AWS Backup; read replica, Multi-AZ DB cluster, parameter group, thử failover Multi-AZ.
 - **000116 – RDS PostgreSQL for Developers:** ứng dụng Node.js dùng `pg` qua TLS `verify-full`; secret do RDS quản lý trong Secrets Manager, đọc qua IAM role; AWS SDK for JavaScript v3 để lấy endpoint và secret; ứng dụng CRUD Express + Handlebars, truy cập bằng Session Manager (không SSH).
 - **000128 – Hugo với GitHub Pages:** user site publish từ branch, workflow Static HTML và workflow Hugo cho CI/CD; dùng Git Credential Manager thay cho personal access token; Hugo quick start với theme Ananke.
+- **000142 – EBS Multi-Attach và NVMe Reservation:** hai VPC tách biệt (prod và test) với private subnet cùng Availability Zone, không NAT, không peering; Session Manager qua interface endpoint, S3 gateway endpoint cho `dnf`; instance Amazon Linux 2023 chạy PostgreSQL 18, một volume `io2` bật Multi-Attach gắn vào cả hai; chạy thử luồng NVMe reservation bằng `nvme-cli`: đăng ký key, reservation Write Exclusive, lệnh ghi từ instance còn lại bị chặn (Reservation Conflict), restore từ mount chỉ đọc, chuyển quyền ghi; sơ đồ kiến trúc mới và chương dọn dẹp bằng CLI.
 
 ### Chạy trên máy
 
