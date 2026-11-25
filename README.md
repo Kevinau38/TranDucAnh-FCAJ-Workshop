@@ -14,6 +14,7 @@ Workshops of the **AWS Study Group – First Cloud AI Journey (FCAJ)** that I, *
 | 000042 | [Savings Plans, Reserved Instances and Reserved DB Instances](000042-purchasesavingplans/) | Published | https://000042.awsfcaj.com |
 | 000045 | [Amazon Lightsail Workshop](000045-lightsail-workshop/) | Published | https://000045.awsfcaj.com |
 | 000046 | [Amazon Lightsail Container](000046-containerlightsail/) | Published | https://000046.awsfcaj.com |
+| 000047 | [Workflow Orchestration with AWS Step Functions](000047-aws-stepfunction/) | Published | https://000047.awsfcaj.com |
 | 000068 | [Storage Performance Lab (Amazon S3 and Amazon EFS)](000068-storageperformance/) | Published | https://000068.awsfcaj.com |
 | 000069 | [Amazon S3 Security Best Practices](000069-s3security/) | Published | https://000069.awsfcaj.com |
 | 000101 | [AWS Service Screener](000101-aws-service-screeneer/) | Published | https://000101.awsfcaj.com |
@@ -69,6 +70,13 @@ What changed in each workshop is listed below.
 
 - Lightsail container service (Nano, 1 node), deploying nginx from Docker Hub.
 - Building an image in AWS CloudShell, pushing it with `push-container-image`, and deploying it as version 2.
+
+### 000047 – Workflow Orchestration with AWS Step Functions
+
+- Account application workflow with Lambda (Node.js 24, AWS SDK for JavaScript v3) and DynamoDB, deployed with AWS SAM from CloudShell instead of Cloud9.
+- `FCJ-SFN-*` IAM roles with a permissions boundary declared in the SAM template, private deployment bucket.
+- Pass, Task, IAM permissions, ResultPath, Choice, callback with a task token, Retry/Catch and Parallel states.
+- New architecture diagram and a CLI clean-up chapter.
 
 ### 000068 – Storage Performance Lab
 
@@ -159,6 +167,7 @@ Các workshop của **AWS Study Group – First Cloud AI Journey (FCAJ)** do mì
 | 000042 | [Savings Plans, Reserved Instances and Reserved DB Instances](000042-purchasesavingplans/) | Đã xuất bản | https://000042.awsfcaj.com |
 | 000045 | [Amazon Lightsail Workshop](000045-lightsail-workshop/) | Đã xuất bản | https://000045.awsfcaj.com |
 | 000046 | [Amazon Lightsail Container](000046-containerlightsail/) | Đã xuất bản | https://000046.awsfcaj.com |
+| 000047 | [Workflow Orchestration with AWS Step Functions](000047-aws-stepfunction/) | Đã xuất bản | https://000047.awsfcaj.com |
 | 000068 | [Storage Performance Lab (Amazon S3 và Amazon EFS)](000068-storageperformance/) | Đã xuất bản | https://000068.awsfcaj.com |
 | 000069 | [Amazon S3 Security Best Practices](000069-s3security/) | Đã xuất bản | https://000069.awsfcaj.com |
 | 000101 | [AWS Service Screener](000101-aws-service-screeneer/) | Đã xuất bản | https://000101.awsfcaj.com |
@@ -188,6 +197,7 @@ Với mỗi workshop, mình:
 - **000042 – Savings Plans và Reserved Instances:** các loại Savings Plans và recommendation, trang mua, EC2 Reserved Instances, reserved DB instance; lab không bao giờ bấm mua nên không tạo tài nguyên và không tốn phí.
 - **000045 – Amazon Lightsail:** WordPress trên Ubuntu 24.04 với database MySQL managed của Lightsail, blueprint PrestaShop (Singapore); firewall, snapshot, chuyển sang instance lớn hơn và gắn lại static IP, alarm CPU.
 - **000046 – Lightsail Container:** container service (Nano, 1 node), deploy nginx từ Docker Hub; build image trong CloudShell, đẩy lên bằng `push-container-image` và deploy thành version 2.
+- **000047 – AWS Step Functions:** quy trình duyệt đơn mở tài khoản với Lambda (Node.js 24, AWS SDK v3) và DynamoDB, triển khai bằng AWS SAM từ CloudShell (thay Cloud9); role `FCJ-SFN-*` có permissions boundary khai báo trong template; Pass → Task → quyền → ResultPath → Choice → callback bằng task token → Retry/Catch → Parallel; sơ đồ kiến trúc mới và chương dọn dẹp bằng CLI.
 - **000068 – Storage Performance:** template CloudFormation mới, dùng IAM role thay cho IAM user (Tokyo); S3: upload đa luồng, `sync`, object nhỏ, server-side copy; EFS: file nhỏ, I/O size và sync, ghi đa luồng, các công cụ copy (`rsync`, `cp`, `fpsync`, `parallel`).
 - **000069 – S3 Security:** một template CloudFormation, truy cập qua IAM role và Session Manager; bắt buộc HTTPS, SSE-S3, chặn public ACL, S3 Block Public Access, giới hạn truy cập qua VPC endpoint, AWS Config rule, IAM Access Analyzer.
 - **000101 – AWS Service Screener:** chạy Service Screener v2 từ CloudShell (Singapore) để quét read-only một bucket demo có tag; đọc báo cáo HTML, tích hợp Well-Architected Tool, xử lý lỗi.
